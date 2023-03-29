@@ -1,15 +1,20 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
 import { ROOMS } from './rooms.mock';
 import { Room } from './rooms.entities';
 import { RoomCreationParams, RoomPatchParams } from './rooms.dto';
 import { randomUUID } from 'crypto';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class RoomsService {
     private rooms: Room[] = ROOMS;
+    constructor(
+        @Inject('ROOM_REPOSITORY')
+        private roomsRepo: Repository<Room>
+    ) {}
 
     public async getAllRooms() : Promise<Room[]> {
-        return this.rooms;
+        return this.roomsRepo.find();
     }
 
     public async getRoomByUUID(uuid: string) : Promise<Room>{
@@ -29,7 +34,7 @@ export class RoomsService {
             newRoom[parameter] = roomDetails[parameter];
         });
         newRoom.UUID = randomUUID();
-        this.rooms.push(newRoom);
+        this.roomsRepo.save(newRoom);
         return newRoom;
     }
 
