@@ -1,6 +1,5 @@
 import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
 import { DepartmentCreationParams, DepartmentPatchParams } from './department.dto';
-import { DEPARTMENTS } from './departments.mock';
 import { randomUUID } from 'crypto';
 import { Department } from './department.entities';
 import { Repository } from 'typeorm';

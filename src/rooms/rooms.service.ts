@@ -1,10 +1,8 @@
 import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
-import { ROOMS } from './rooms.mock';
 import { Room } from './rooms.entities';
 import { RoomCreationParams, RoomPatchParams } from './rooms.dto';
 import { randomUUID } from 'crypto';
 import { Repository } from 'typeorm';
-import { rootCertificates } from 'tls';
 
 @Injectable()
 export class RoomsService {
