@@ -3,10 +3,10 @@ import { Column, Entity, PrimaryColumn } from "typeorm";
 @Entity()
 export class Bed {
     @PrimaryColumn({unique: true})
-    Id: Number;
+    Id: number;
 
     @Column({unique: true})
-    UUID: String;
+    UUID: string;
 
     @Column()
     roomId: number;
