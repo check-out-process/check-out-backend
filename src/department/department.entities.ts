@@ -4,13 +4,13 @@ import { Column, Entity, PrimaryColumn } from "typeorm";
 export class Department {
 
     @PrimaryColumn({unique: true})
-    Id: Number;
+    Id: number;
 
     @Column({unique: true})
-    UUID: String;
+    UUID: string;
 
     @Column()
-    Name: String;
+    Name: string;
 
     constructor(id?: number, uuid?: string, name?: string ){
         this.Id = id; this.UUID = uuid; this.Name = name;
