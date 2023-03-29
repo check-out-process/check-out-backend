@@ -4,10 +4,10 @@ import { Room } from './rooms.entities';
 import { RoomCreationParams, RoomPatchParams } from './rooms.dto';
 import { randomUUID } from 'crypto';
 import { Repository } from 'typeorm';
+import { rootCertificates } from 'tls';
 
 @Injectable()
 export class RoomsService {
-    private rooms: Room[] = ROOMS;
     constructor(
         @Inject('ROOM_REPOSITORY')
         private roomsRepo: Repository<Room>
@@ -18,9 +18,11 @@ export class RoomsService {
     }
 
     public async getRoomByUUID(uuid: string) : Promise<Room>{
-        const roomSelected = this.rooms.find((room) => {
-            room.UUID = uuid;
-        })
+        const roomSelected : Room = await this.roomsRepo.findOne({
+            where: {
+                UUID: uuid
+            }
+        });
         if (!roomSelected){
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         }
@@ -28,7 +30,7 @@ export class RoomsService {
     }
 
     public async createRoom(roomDetails: RoomCreationParams) : Promise<Room> {
-        let newRoom : Room = new Room();
+        let newRoom : Room = this.roomsRepo.create()
         const parameters : string[] = Object.keys(roomDetails);
         parameters.forEach((parameter) => {
             newRoom[parameter] = roomDetails[parameter];
@@ -38,28 +40,19 @@ export class RoomsService {
         return newRoom;
     }
 
-    public async updateRoom(uuid: string, roomDetails: RoomPatchParams) : Promise<Room> {
-        const roomIndex : number = this.rooms.findIndex((room) => room.UUID === uuid);
-        if (roomIndex == -1){
-            throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
-        }
-        let newRoom : Room = this.rooms[roomIndex];
-        const parametersChanged : string[] = Object.keys(roomDetails);
-        parametersChanged.forEach((parameter) => {
-            newRoom[parameter] = roomDetails[parameter];
-        })
-        this.rooms[roomIndex] = newRoom;
-        return newRoom;
+    public async updateRoom(uuid: string, roomUpdatedDetails: RoomPatchParams) : Promise<Room> {
+        let room : Room = await this.getRoomByUUID(uuid);
+        const parameters : string[] = Object.keys(roomUpdatedDetails);
+        parameters.forEach((parameter) => {
+            room[parameter] = roomUpdatedDetails[parameter]
+        });
+        this.roomsRepo.save(room);
+        return room;
     }
 
     public async deleteRoom(uuid: string) : Promise<Room> {
-        const roomIndex = this.rooms.findIndex((room) => 
-            room.UUID === uuid);
-        if (roomIndex == -1){
-            throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
-        }
-        const deletedRoom = this.rooms[roomIndex];
-        this.rooms.splice(roomIndex, 1);
-        return deletedRoom;
+        const roomToDelete : Room = await this.getRoomByUUID(uuid);
+        this.roomsRepo.delete(roomToDelete);
+        return roomToDelete;    
     }
 }
