@@ -11,15 +11,17 @@ export class DepartmentService {
         @Inject('DEPARTMENT_REPOSITORY')
         private departmentRepo: Repository<Department> 
     ) {}
-    private departments : Department[] = DEPARTMENTS;
     
     public async getAllDepartments() : Promise<Department[]>{
-        return this.departments;
+        return this.departmentRepo.find();
     }
 
     public async getDepartmentByUUID(uuid: string) : Promise<Department>{
-        const department = this.departments.find((department) => 
-            department.UUID === uuid);
+        const department = this.departmentRepo.findOne({
+            where: {
+                UUID: uuid
+            }
+        })
         if (!department){
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
         }
@@ -27,7 +29,7 @@ export class DepartmentService {
     }
 
     public async addDepartment(department : DepartmentCreationParams) : Promise<Department>{
-        let newDepartment : Department = new Department();
+        let newDepartment : Department = this.departmentRepo.create();
         const parameters : string[] = Object.keys(department);
         parameters.forEach((parameter) => {
             newDepartment[parameter] = department[parameter];
@@ -37,28 +39,19 @@ export class DepartmentService {
         return newDepartment;
     }
 
-    public async deleteDepartment(uuid: string) : Promise<void> {
-        const departmentIndex = this.departments.findIndex((department) => 
-            department.UUID === uuid);
-        if (departmentIndex == -1){
-            throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
-        }
-        this.departments.splice(departmentIndex, 1);
-        return;
+    public async deleteDepartment(uuid: string) : Promise<Department> {
+        let departmentToDelete : Department = await this.getDepartmentByUUID(uuid);
+        this.departmentRepo.delete(departmentToDelete);
+        return departmentToDelete;
     }
 
     public async updateDepartment(uuid : string, data : DepartmentPatchParams) : Promise<Department> {
-        const departmentIndex : number = this.departments.findIndex((department) => 
-            department.UUID === uuid);
-        if (departmentIndex == -1){
-            throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
-        }
-        let department : Department = this.departments[departmentIndex]
-        const parametersChanged : string[] = Object.keys(data);
-        parametersChanged.forEach((parameter) => {
+        let department : Department = await this.getDepartmentByUUID(uuid);
+        const parameters : string[] = Object.keys(data);
+        parameters.forEach((parameter) => {
             department[parameter] = data[parameter];
-        })
-        this.departments[departmentIndex] = department;
+        });
+        this.departmentRepo.save(department);
         return department;
     }
 
