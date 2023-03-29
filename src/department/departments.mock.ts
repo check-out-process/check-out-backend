@@ -1,4 +1,4 @@
-import { Department } from './department.entitites';
+import { Department } from './department.entities';
 
 
 export const DEPARTMENTS : Department[] = [

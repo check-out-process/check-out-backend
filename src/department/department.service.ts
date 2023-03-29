@@ -1,11 +1,16 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
 import { DepartmentCreationParams, DepartmentPatchParams } from './department.dto';
 import { DEPARTMENTS } from './departments.mock';
 import { randomUUID } from 'crypto';
-import { Department } from './department.entitites';
+import { Department } from './department.entities';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class DepartmentService {
+    constructor(
+        @Inject('DEPARTMENT_REPOSITORY')
+        private departmentRepo: Repository<Department> 
+    ) {}
     private departments : Department[] = DEPARTMENTS;
     
     public async getAllDepartments() : Promise<Department[]>{
@@ -28,7 +33,7 @@ export class DepartmentService {
             newDepartment[parameter] = department[parameter];
         });
         newDepartment.UUID = randomUUID();
-        this.departments.push(newDepartment);
+        this.departmentRepo.save(newDepartment);
         return newDepartment;
     }
 
