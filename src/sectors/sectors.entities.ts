@@ -1,24 +1,24 @@
-import { IsString, IsNumber } from "class-validator";
+import { Column, PrimaryColumn } from "typeorm";
 
 export class Sector {
-    @IsString()
+    @PrimaryColumn()
     id: string;
 
-    @IsString()
+    @Column()
     sectorName: string;
 
-    @IsNumber()
+    @Column()
     defaultResponsibleUserId: number;
 
 }
 
 export class SectorResponsible {
-    @IsString()
+    @PrimaryColumn()
     id: string;
 
-    @IsString()
+    @Column()
     sectorId: string;
 
-    @IsNumber()
+    @Column()
     userId: number;
 }
