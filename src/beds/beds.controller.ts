@@ -3,7 +3,7 @@ import { BedCreationParams, BedPatchParams } from './beds.dto';
 import { Bed } from './beds.entities';
 import { BedsService } from './beds.service';
 
-@Controller('beds')
+@Controller(':departmentId/rooms/:roomsId/beds')
 export class BedsController {
     constructor(private bedsService : BedsService) {}
 
@@ -12,9 +12,9 @@ export class BedsController {
         return await this.bedsService.getAllBeds();
     }
 
-    @Get(':bedUUID')
+    @Get(':bedID')
     async getBed(@Param() params) : Promise<Bed> {
-        return await this.bedsService.getBedByUUID(params.bedUUID);
+        return await this.bedsService.getBedByID(params.bedID);
     }
 
     @Post()
@@ -22,14 +22,14 @@ export class BedsController {
         return await this.bedsService.addBed(data);
     }
 
-    @Delete(':bedUUID')
+    @Delete(':bedID')
     async deleteBed(@Param() params) : Promise<Bed> {
-        return await this.bedsService.deleteBed(params.bedUUID);
+        return await this.bedsService.deleteBed(params.bedID);
     }
 
-    @Patch(':bedUUID')
+    @Patch(':bedID')
     async updateBed(@Body() data : BedPatchParams, @Param() params) : Promise<Bed> {
-        return await this.bedsService.updateBed(params.bedUUID, data);
+        return await this.bedsService.updateBed(params.bedID, data);
     }
 
 }

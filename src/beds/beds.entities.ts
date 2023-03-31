@@ -2,11 +2,9 @@ import { Column, Entity, PrimaryColumn } from "typeorm";
 
 @Entity()
 export class Bed {
-    @PrimaryColumn({unique: true})
-    Id: number;
 
-    @Column({unique: true})
-    UUID: string;
+    @PrimaryColumn({unique: true})
+    ID: string;
 
     @Column()
     roomId: number;
@@ -14,7 +12,7 @@ export class Bed {
     @Column({unique: true})
     textQR: string;
 
-    constructor(id?: number, uuid?: string, roomId?: number, QR?: string){
-        this.Id = id; this.UUID = uuid; this.roomId = roomId; this.textQR = QR;
+    constructor(id?: string, roomId?: number, QR?: string){
+        this.ID = id; this.roomId = roomId; this.textQR = QR;
     }
 }

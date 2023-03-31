@@ -12,9 +12,9 @@ export class RoomsController {
         return await this.roomsService.getAllRoomsOfDepartment(params.departmentId);
     }
 
-    @Get(':roomUUID')
+    @Get(':roomID')
     async getRoom(@Param() params): Promise<Room> {
-        return await this.roomsService.getRoomByUUID(params.roomUUID, params.departmentId);
+        return await this.roomsService.getRoomByID(params.roomID, params.departmentId);
     }
 
     @Post()
@@ -22,16 +22,16 @@ export class RoomsController {
         return await this.roomsService.createRoom(params.departmentId, data);
     }
 
-    @Patch(':roomUUID')
+    @Patch(':roomID')
     async updateRoom(
         @Body() data: RoomPatchParams,
         @Param() params) : Promise<Room> {
-        return await this.roomsService.updateRoom(params.roomUUID, params.departmentId, data);
+        return await this.roomsService.updateRoom(params.roomID, params.departmentId, data);
     }
 
-    @Delete(':roomUUID')
+    @Delete(':roomID')
     async deleteRoom(@Param() params) : Promise<Room> {
-        return await this.roomsService.deleteRoom(params.roomUUID, params.departmentId);
+        return await this.roomsService.deleteRoom(params.roomID, params.departmentId);
     }
 
 }

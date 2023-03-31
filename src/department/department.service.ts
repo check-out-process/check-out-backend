@@ -15,10 +15,10 @@ export class DepartmentService {
         return this.departmentRepo.find();
     }
 
-    public async getDepartmentByUUID(uuid: string) : Promise<Department>{
+    public async getDepartmentByID(id: string) : Promise<Department>{
         const department = this.departmentRepo.findOne({
             where: {
-                UUID: uuid
+                ID: id
             }
         })
         if (!department){
@@ -33,19 +33,19 @@ export class DepartmentService {
         parameters.forEach((parameter) => {
             newDepartment[parameter] = department[parameter];
         });
-        newDepartment.UUID = randomUUID();
+        newDepartment.ID = randomUUID();
         this.departmentRepo.save(newDepartment);
         return newDepartment;
     }
 
-    public async deleteDepartment(uuid: string) : Promise<Department> {
-        let departmentToDelete : Department = await this.getDepartmentByUUID(uuid);
+    public async deleteDepartment(id: string) : Promise<Department> {
+        let departmentToDelete : Department = await this.getDepartmentByID(id);
         this.departmentRepo.delete(departmentToDelete);
         return departmentToDelete;
     }
 
-    public async updateDepartment(uuid : string, data : DepartmentPatchParams) : Promise<Department> {
-        let department : Department = await this.getDepartmentByUUID(uuid);
+    public async updateDepartment(id : string, data : DepartmentPatchParams) : Promise<Department> {
+        let department : Department = await this.getDepartmentByID(id);
         const parameters : string[] = Object.keys(data);
         parameters.forEach((parameter) => {
             department[parameter] = data[parameter];

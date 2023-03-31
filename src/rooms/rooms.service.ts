@@ -26,10 +26,10 @@ export class RoomsService {
         }
     }
 
-    public async getRoomByUUID(uuid: string, departmentID: string) : Promise<Room>{
+    public async getRoomByID(id: string, departmentID: string) : Promise<Room>{
         const roomSelected : Room = await this.roomsRepo.findOne({
             where: {
-                UUID: uuid
+                ID: id
             }
         });
         if (!roomSelected){
@@ -46,13 +46,13 @@ export class RoomsService {
         parameters.forEach((parameter) => {
             newRoom[parameter] = roomDetails[parameter];
         });
-        newRoom.UUID = randomUUID();
+        newRoom.ID = randomUUID();
         this.roomsRepo.save(newRoom);
         return newRoom;
     }
 
-    public async updateRoom(uuid: string, departmentId: string, roomUpdatedDetails: RoomPatchParams) : Promise<Room> {
-        let room : Room = await this.getRoomByUUID(uuid, departmentId);
+    public async updateRoom(id: string, departmentId: string, roomUpdatedDetails: RoomPatchParams) : Promise<Room> {
+        let room : Room = await this.getRoomByID(id, departmentId);
         const parameters : string[] = Object.keys(roomUpdatedDetails);
         parameters.forEach((parameter) => {
             room[parameter] = roomUpdatedDetails[parameter]
@@ -61,8 +61,8 @@ export class RoomsService {
         return room;
     }
 
-    public async deleteRoom(uuid: string, departmentId: string) : Promise<Room> {
-        const roomToDelete : Room = await this.getRoomByUUID(uuid, departmentId);
+    public async deleteRoom(id: string, departmentId: string) : Promise<Room> {
+        const roomToDelete : Room = await this.getRoomByID(id, departmentId);
         this.roomsRepo.delete(roomToDelete);
         return roomToDelete;    
     }

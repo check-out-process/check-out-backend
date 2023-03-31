@@ -10,27 +10,27 @@ export class DepartmentController {
     constructor(private departmentService: DepartmentService){}
 
     @Get()
-    async getAllDepartments(){
+    async getAllDepartments() : Promise<Department[]> {
         return await this.departmentService.getAllDepartments();
     }
 
-    @Get(':departmentUUID')
+    @Get(':departmentID')
     async getDepartment(@Param() params) : Promise<Department>{
-        return await this.departmentService.getDepartmentByUUID(params.departmentUUID);
+        return await this.departmentService.getDepartmentByID(params.departmentID);
     }
 
     @Post()
-    async addDepartment(@Body() data: DepartmentCreationParams){
+    async addDepartment(@Body() data: DepartmentCreationParams) : Promise<Department>{
         return await this.departmentService.addDepartment(data)
     }
 
-    @Patch(':departmentUUID')
-    async editDepartment(@Param() params, @Body() data : DepartmentPatchParams){
-        return await this.departmentService.updateDepartment(params.departmentUUID, data);
+    @Patch(':departmentID')
+    async editDepartment(@Param() params, @Body() data : DepartmentPatchParams) : Promise<Department>{
+        return await this.departmentService.updateDepartment(params.departmentID, data);
     }
 
-    @Delete(':departmentUUID')
-    async deleteDepartment(@Param() params) : Promise<void>{
-        await await this.departmentService.deleteDepartment(params.departmentUUID);
+    @Delete(':departmentID')
+    async deleteDepartment(@Param() params) : Promise<Department>{
+        return await this.departmentService.deleteDepartment(params.departmentID);
     }
 }

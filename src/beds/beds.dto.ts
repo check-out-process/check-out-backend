@@ -1,11 +1,14 @@
-export type BedCreationParams = {
-    Id: number,
-    roomId: number,
-    textQR: string
+import { IsOptional, IsString } from "class-validator";
+
+export class BedCreationParams {
+
+    @IsString()
+    textQR: string;
 }
 
-export type BedPatchParams = {
-    Id?: number,
-    roomId?: number,
-    textQR?: string
+export class BedPatchParams {
+
+    @IsString()
+    @IsOptional()
+    textQR?: string;
 }

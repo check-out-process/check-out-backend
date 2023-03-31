@@ -1,9 +1,9 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { type } from 'os';
 import { QueryFailedError, Repository } from 'typeorm';
 import { BedCreationParams, BedPatchParams } from './beds.dto';
 import { Bed } from './beds.entities';
+import * as _ from 'lodash';
 
 @Injectable()
 export class BedsService {
@@ -16,12 +16,26 @@ export class BedsService {
         return this.bedRepo.find();
     }
 
-    public async getBedByUUID(uuid: string) : Promise<Bed> {
+    public async getBedByID(id: string) : Promise<Bed> {
         return this.bedRepo.findOne({
             where: {
-                UUID: uuid
+                ID: id
             },
         });
+    }
+
+    public async getAllBedsOfRoom(roomID: number) : Promise<Bed[]> {
+        const beds : Bed[] = await this.bedRepo.find({
+            where: {
+                roomId: roomID
+            }
+        });
+        if (_.isEmpty(beds) || _.isNull(beds)){
+            this.throwNotFoundException(`Room (ID: ${roomID}) has no beds assigned`);
+        }
+        else {
+            return beds;
+        }
     }
 
     public async addBed(bed : BedCreationParams) : Promise<Bed>{
@@ -30,7 +44,7 @@ export class BedsService {
         parameters.forEach((parameter) => {
             newBed[parameter] = bed[parameter];
         });
-        newBed.UUID = randomUUID();
+        newBed.ID = randomUUID();
         try {
             this.bedRepo.save(newBed);
             return newBed;
@@ -45,15 +59,15 @@ export class BedsService {
         }
     }
 
-    public async deleteBed(uuid: string) : Promise<Bed> {
-        let bedToDelete : Bed = await this.getBedByUUID(uuid);
+    public async deleteBed(id: string) : Promise<Bed> {
+        let bedToDelete : Bed = await this.getBedByID(id);
         this.bedRepo.delete(bedToDelete);
 
         return bedToDelete;
     }
 
-    public async updateBed(uuid: string, data : BedPatchParams) : Promise<Bed> {
-        let bed = await this.getBedByUUID(uuid);
+    public async updateBed(id: string, data : BedPatchParams) : Promise<Bed> {
+        let bed = await this.getBedByID(id);
         const parameters : string[] = Object.keys(data);
         parameters.forEach((parameter) => {
             bed[parameter] = data[parameter];
@@ -61,4 +75,9 @@ export class BedsService {
         this.bedRepo.save(bed);
         return bed;
     }
+    
+    private throwNotFoundException(message: string) {
+        throw new HttpException(message, HttpStatus.NOT_FOUND);   
+    }
 }
+

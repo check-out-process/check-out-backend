@@ -4,7 +4,7 @@ import { Column, Entity, PrimaryColumn } from "typeorm";
 export class Room{
 
     @PrimaryColumn({unique: true})
-    UUID: string;
+    ID: string;
 
     @Column()
     departmentId: string;
@@ -12,7 +12,7 @@ export class Room{
     @Column()
     roomName: string;
 
-    constructor(uuid?: string, departmentID?: string, name?: string){
-        this.UUID = uuid; this.departmentId = departmentID; this.roomName = name;
+    constructor(id?: string, departmentID?: string, name?: string){
+        this.ID = id; this.departmentId = departmentID; this.roomName = name;
     }
 }
