@@ -11,10 +11,6 @@ export class BedsService {
         @Inject('BED_REPOSITORY')
         private bedRepo : Repository<Bed>
     ){}
-    
-    public async getAllBeds() : Promise<Bed[]> {
-        return this.bedRepo.find();
-    }
 
     public async getBedByID(id: string) : Promise<Bed> {
         return this.bedRepo.findOne({
@@ -24,7 +20,7 @@ export class BedsService {
         });
     }
 
-    public async getAllBedsOfRoom(roomID: number) : Promise<Bed[]> {
+    public async getAllBedsOfRoom(roomID: string) : Promise<Bed[]> {
         const beds : Bed[] = await this.bedRepo.find({
             where: {
                 roomId: roomID
@@ -38,8 +34,9 @@ export class BedsService {
         }
     }
 
-    public async addBed(bed : BedCreationParams) : Promise<Bed>{
+    public async addBed(roomId: string, bed : BedCreationParams) : Promise<Bed>{
         let newBed : Bed = this.bedRepo.create();
+        newBed.roomId = roomId;
         const parameters : string[] = Object.keys(bed);
         parameters.forEach((parameter) => {
             newBed[parameter] = bed[parameter];
@@ -59,14 +56,14 @@ export class BedsService {
         }
     }
 
-    public async deleteBed(id: string) : Promise<Bed> {
+    public async deleteBed(id: string, roomId: string) : Promise<Bed> {
         let bedToDelete : Bed = await this.getBedByID(id);
         this.bedRepo.delete(bedToDelete);
 
         return bedToDelete;
     }
 
-    public async updateBed(id: string, data : BedPatchParams) : Promise<Bed> {
+    public async updateBed(id: string, roomId: string, data : BedPatchParams) : Promise<Bed> {
         let bed = await this.getBedByID(id);
         const parameters : string[] = Object.keys(data);
         parameters.forEach((parameter) => {

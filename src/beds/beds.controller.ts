@@ -3,13 +3,13 @@ import { BedCreationParams, BedPatchParams } from './beds.dto';
 import { Bed } from './beds.entities';
 import { BedsService } from './beds.service';
 
-@Controller(':departmentId/rooms/:roomsId/beds')
+@Controller(':departmentId/rooms/:roomId/beds')
 export class BedsController {
     constructor(private bedsService : BedsService) {}
 
     @Get()
-    async getAllBeds() : Promise<Bed[]> {
-        return await this.bedsService.getAllBeds();
+    async getAllBeds(@Param() params) : Promise<Bed[]> {
+        return await this.bedsService.getAllBedsOfRoom(params.roomId);
     }
 
     @Get(':bedID')
@@ -18,18 +18,18 @@ export class BedsController {
     }
 
     @Post()
-    async addBed(@Body() data : BedCreationParams) : Promise<Bed> {
-        return await this.bedsService.addBed(data);
+    async addBed(@Body() data : BedCreationParams, @Param() params) : Promise<Bed> {
+        return await this.bedsService.addBed(params.roomId ,data);
     }
 
     @Delete(':bedID')
     async deleteBed(@Param() params) : Promise<Bed> {
-        return await this.bedsService.deleteBed(params.bedID);
+        return await this.bedsService.deleteBed(params.bedID, params.roomId);
     }
 
     @Patch(':bedID')
     async updateBed(@Body() data : BedPatchParams, @Param() params) : Promise<Bed> {
-        return await this.bedsService.updateBed(params.bedID, data);
+        return await this.bedsService.updateBed(params.bedID, params.roomId, data);
     }
 
 }

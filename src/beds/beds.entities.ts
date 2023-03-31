@@ -7,12 +7,12 @@ export class Bed {
     ID: string;
 
     @Column()
-    roomId: number;
+    roomId: string;
 
     @Column({unique: true})
     textQR: string;
 
-    constructor(id?: string, roomId?: number, QR?: string){
+    constructor(id?: string, roomId?: string, QR?: string){
         this.ID = id; this.roomId = roomId; this.textQR = QR;
     }
 }
