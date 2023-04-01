@@ -9,7 +9,7 @@ export class Bed {
     @Column()
     roomId: string;
 
-    @Column()
+    @Column({default: ""})
     departmentId: string;
 
     @Column({default: "Bed"})

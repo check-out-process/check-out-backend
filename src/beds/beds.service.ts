@@ -34,9 +34,10 @@ export class BedsService {
         }
     }
 
-    public async addBed(roomId: string, bed : BedCreationParams) : Promise<Bed>{
+    public async addBed(roomId: string, departmentId: string, bed : BedCreationParams) : Promise<Bed>{
         let newBed : Bed = this.bedRepo.create();
         newBed.roomId = roomId;
+        newBed.departmentId = departmentId;
         const parameters : string[] = Object.keys(bed);
         parameters.forEach((parameter) => {
             newBed[parameter] = bed[parameter];

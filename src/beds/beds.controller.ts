@@ -19,7 +19,7 @@ export class BedsController {
 
     @Post()
     async addBed(@Body() data : BedCreationParams, @Param() params) : Promise<Bed> {
-        return await this.bedsService.addBed(params.roomId ,data);
+        return await this.bedsService.addBed(params.roomId, params.departmentId, data);
     }
 
     @Delete(':bedID')
