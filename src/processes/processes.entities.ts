@@ -12,11 +12,11 @@ export class Process {
     @Column()
     description: string;
 
-    @OneToOne(() => ProcessType)
+    @OneToOne(() => ProcessType, {eager: true})
     @JoinColumn()
     processType: ProcessType;
 
-    @OneToOne(() => User)
+    @OneToOne(() => User, {eager: true})
     @JoinColumn()
     creatingUser: User;
 
