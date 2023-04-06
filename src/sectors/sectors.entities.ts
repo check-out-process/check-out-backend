@@ -1,8 +1,10 @@
-import { Column, PrimaryColumn } from "typeorm";
+import { User } from "src/users/users.entities";
+import { Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from "typeorm";
 
+@Entity()
 export class Sector {
     @PrimaryColumn()
-    id: string;
+    ID: string;
 
     @Column()
     sectorName: string;
@@ -10,11 +12,15 @@ export class Sector {
     @Column()
     defaultResponsibleUserId: number;
 
+    @ManyToMany(() => User, (user) => user.sectors)
+    @JoinTable()
+    commitersUsers: Promise<User[]>; 
+
 }
 
 export class SectorResponsible {
     @PrimaryColumn()
-    id: string;
+    ID: string;
 
     @Column()
     sectorId: string;
