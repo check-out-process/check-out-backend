@@ -2,7 +2,6 @@ import { Controller, Get, Param, Post, Body, Delete, Patch } from '@nestjs/commo
 import { BedCreationParams, BedPatchParams } from './beds.dto';
 import { Bed } from './beds.entities';
 import { BedsService } from './beds.service';
-import { notDeepEqual } from 'assert';
 
 @Controller(':departmentId/rooms/:roomId/beds')
 export class BedsController {
