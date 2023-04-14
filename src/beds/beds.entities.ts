@@ -9,10 +9,16 @@ export class Bed {
     @Column()
     roomId: string;
 
+    @Column()
+    name: string;
+
     @Column({unique: true})
     textQR: string;
 
-    constructor(id?: string, roomId?: string, QR?: string){
-        this.ID = id; this.roomId = roomId; this.textQR = QR;
+    constructor(id?: string, roomId?: string, name?: string, QR?: string){
+        this.ID = id;
+        this.roomId = roomId;
+        this.textQR = QR;
+        this.name = name;
     }
 }

@@ -9,7 +9,14 @@ export class RoomsController {
 
     @Get()
     async getAllRooms(@Param() params){
-        return await this.roomsService.getAllRoomsOfDepartment(params.departmentId);
+        const rooms: Room[] =  await this.roomsService.getAllRoomsOfDepartment(params.departmentId);
+        return rooms.map((room: Room) => {
+            return {
+                id: room.ID,
+                departmentId: room.departmentId,
+                name: room.roomName
+            }
+        })
     }
 
     @Get(':roomID')

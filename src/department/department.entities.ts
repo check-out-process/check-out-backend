@@ -12,4 +12,11 @@ export class Department {
     constructor(id?: string, name?: string ){
          this.ID = id; this.Name = name;
     }
+    
+    // public toJson(){
+    //     return {
+    //         id: this.ID,
+    //         name: this.Name
+    //     }
+    // }
 }

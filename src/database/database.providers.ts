@@ -7,10 +7,10 @@ export const databaseProviders = [
       const dataSource = new DataSource({
         type: 'mssql',
         host: 'localhost',
-        port: 1433,
+        port: 1111,
         username: 'sa',
         password: 'Password1',
-        database: 'keeper-test',
+        database: 'Checkout',
         entities: [
           __dirname + '/../**/*.entities.js',
         ],

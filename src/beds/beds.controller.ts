@@ -2,14 +2,22 @@ import { Controller, Get, Param, Post, Body, Delete, Patch } from '@nestjs/commo
 import { BedCreationParams, BedPatchParams } from './beds.dto';
 import { Bed } from './beds.entities';
 import { BedsService } from './beds.service';
+import { notDeepEqual } from 'assert';
 
 @Controller(':departmentId/rooms/:roomId/beds')
 export class BedsController {
     constructor(private bedsService : BedsService) {}
 
     @Get()
-    async getAllBeds(@Param() params) : Promise<Bed[]> {
-        return await this.bedsService.getAllBedsOfRoom(params.roomId);
+    async getAllBeds(@Param() params) : Promise<Object[]> {
+        const beds: Bed[] = await this.bedsService.getAllBedsOfRoom(params.roomId);
+        return beds.map((bed: Bed) => {
+            return {
+                id: bed.ID,
+                name: bed.name,
+                roomId: bed.roomId
+            }
+        })
     }
 
     @Get(':bedID')

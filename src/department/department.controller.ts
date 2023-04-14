@@ -7,30 +7,36 @@ import { Department } from './department.entities';
 
 @Controller('departments')
 export class DepartmentController {
-    constructor(private departmentService: DepartmentService){}
+    constructor(private departmentService: DepartmentService) { }
 
     @Get()
-    async getAllDepartments() : Promise<Department[]> {
-        return await this.departmentService.getAllDepartments();
+    async getAllDepartments(): Promise<Object[]> {
+        const departments: Department[] = await this.departmentService.getAllDepartments();
+        return departments.map((department: Department) => {
+            return {
+                id: department.ID,
+                name: department.Name
+            }
+        })
     }
 
     @Get(':departmentID')
-    async getDepartment(@Param() params) : Promise<Department>{
+    async getDepartment(@Param() params): Promise<Department> {
         return await this.departmentService.getDepartmentByID(params.departmentID);
     }
 
     @Post()
-    async addDepartment(@Body() data: DepartmentCreationParams) : Promise<Department>{
+    async addDepartment(@Body() data: DepartmentCreationParams): Promise<Department> {
         return await this.departmentService.addDepartment(data)
     }
 
     @Patch(':departmentID')
-    async editDepartment(@Param() params, @Body() data : DepartmentPatchParams) : Promise<Department>{
+    async editDepartment(@Param() params, @Body() data: DepartmentPatchParams): Promise<Department> {
         return await this.departmentService.updateDepartment(params.departmentID, data);
     }
 
     @Delete(':departmentID')
-    async deleteDepartment(@Param() params) : Promise<Department>{
+    async deleteDepartment(@Param() params): Promise<Department> {
         return await this.departmentService.deleteDepartment(params.departmentID);
     }
 }
