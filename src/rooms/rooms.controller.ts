@@ -1,7 +1,7 @@
 import { Controller, Get, Param, Body, Post, Delete, Patch } from '@nestjs/common';
 import { RoomsService } from './rooms.service';
 import { Room } from './rooms.entities';
-import { RoomCreationParams, RoomPatchParams } from './rooms.dto';
+import { RoomCreationParams, RoomPatchParams } from '@checkout/types';
 
 @Controller(':departmentId/rooms')
 export class RoomsController {

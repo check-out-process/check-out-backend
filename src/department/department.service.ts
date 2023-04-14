@@ -1,5 +1,5 @@
 import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
-import { DepartmentCreationParams, DepartmentPatchParams } from './department.dto';
+import { DepartmentCreationParams, DepartmentPatchParams } from '@checkout/types';
 import { randomUUID } from 'crypto';
 import { Department } from './department.entities';
 import { Repository } from 'typeorm';
@@ -18,7 +18,7 @@ export class DepartmentService {
     public async getDepartmentByID(id: string) : Promise<Department>{
         const department = this.departmentRepo.findOne({
             where: {
-                ID: id
+                id: id
             }
         })
         if (!department){
@@ -33,7 +33,7 @@ export class DepartmentService {
         parameters.forEach((parameter) => {
             newDepartment[parameter] = department[parameter];
         });
-        newDepartment.ID = randomUUID();
+        newDepartment.id = randomUUID();
         this.departmentRepo.save(newDepartment);
         return newDepartment;
     }

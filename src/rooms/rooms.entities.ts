@@ -4,15 +4,15 @@ import { Column, Entity, PrimaryColumn } from "typeorm";
 export class Room{
 
     @PrimaryColumn({unique: true})
-    ID: string;
+    id: string;
 
     @Column()
     departmentId: string;
 
     @Column()
-    roomName: string;
+    name: string;
 
-    constructor(id?: string, departmentID?: string, name?: string){
-        this.ID = id; this.departmentId = departmentID; this.roomName = name;
+    constructor(id?: string, departmentId?: string, name?: string){
+        this.id = id; this.departmentId = departmentId; this.name = name;
     }
 }

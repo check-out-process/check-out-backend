@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { QueryFailedError, Repository } from 'typeorm';
-import { BedCreationParams, BedPatchParams } from './beds.dto';
+import { BedCreationParams, BedPatchParams } from '@checkout/types';
 import { Bed } from './beds.entities';
 import * as _ from 'lodash';
 
@@ -15,7 +15,7 @@ export class BedsService {
     public async getBedByID(id: string) : Promise<Bed> {
         return this.bedRepo.findOne({
             where: {
-                ID: id
+                id: id
             },
         });
     }
@@ -42,7 +42,7 @@ export class BedsService {
         parameters.forEach((parameter) => {
             newBed[parameter] = bed[parameter];
         });
-        newBed.ID = randomUUID();
+        newBed.id = randomUUID();
         try {
             this.bedRepo.save(newBed);
             return newBed;

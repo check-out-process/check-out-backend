@@ -1,6 +1,6 @@
 import { Injectable, HttpException, HttpStatus, Inject } from '@nestjs/common';
 import { Room } from './rooms.entities';
-import { RoomCreationParams, RoomPatchParams } from './rooms.dto';
+import { RoomCreationParams, RoomPatchParams } from '@checkout/types';
 import { randomUUID } from 'crypto';
 import { Repository } from 'typeorm';
 import * as _ from 'lodash';
@@ -29,7 +29,7 @@ export class RoomsService {
     public async getRoomByID(id: string, departmentID: string) : Promise<Room>{
         const roomSelected : Room = await this.roomsRepo.findOne({
             where: {
-                ID: id
+                id: id
             }
         });
         if (!roomSelected){
@@ -46,7 +46,7 @@ export class RoomsService {
         parameters.forEach((parameter) => {
             newRoom[parameter] = roomDetails[parameter];
         });
-        newRoom.ID = randomUUID();
+        newRoom.id = randomUUID();
         this.roomsRepo.save(newRoom);
         return newRoom;
     }

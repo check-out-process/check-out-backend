@@ -1,5 +1,5 @@
 import { Controller, Get, Param, Post, Body, Delete, Patch } from '@nestjs/common';
-import { BedCreationParams, BedPatchParams } from './beds.dto';
+import { BedCreationParams, BedPatchParams } from '@checkout/types';
 import { Bed } from './beds.entities';
 import { BedsService } from './beds.service';
 

@@ -2,7 +2,7 @@ import { Body, Controller, Get, Patch, Post } from '@nestjs/common';
 import { Delete } from '@nestjs/common/decorators/http/request-mapping.decorator';
 import { Param } from '@nestjs/common/decorators/http/route-params.decorator';
 import { DepartmentService } from './department.service';
-import { DepartmentCreationParams, DepartmentPatchParams } from './department.dto';
+import { DepartmentCreationParams, DepartmentPatchParams } from '@checkout/types';
 import { Department } from './department.entities';
 
 @Controller('departments')
