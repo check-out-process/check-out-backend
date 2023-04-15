@@ -1,54 +1,8 @@
-import { Status } from "@checkout/types";
 import { Bed } from "src/beds/beds.entities";
-import { ProcessType } from "src/process-templates/processes.entities";
+import { ProcessType } from "src/process-templates/process-templates.entities";
 import { User } from "src/users/users.entities";
-import { Column, CreateDateColumn, Entity, Generated, Index, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryColumn, UpdateDateColumn } from "typeorm";
-
-@Entity()
-export class SectorInstance {
-    @PrimaryColumn({unique: true})
-    instanceId: string;
-
-    @Column()
-    sectorId: string;
-
-    @Column()
-    name: string;
-
-    @ManyToOne(() => ProcessInstance, (proc) => proc.sectorInstances)
-    process: ProcessInstance;
-
-    @Column({
-        type: "enum",
-        enum: Status,
-        default: Status.Waiting
-    })
-    status: Status;
-
-    @OneToOne(() => User, {eager: true})
-    commitingWorker: User;
-
-    @OneToOne(() => User, {eager: true})
-    responsiblePerson: User; 
-
-    @OneToOne(() => Bed, {eager: true})
-    bed: Bed;
-
-    @CreateDateColumn({type: 'datetime'})
-    createdAt: Date;
-
-    @UpdateDateColumn({type: 'datetime'})
-    updatedAt: Date;
-
-    @Column({
-        type: 'datetime',
-        nullable: true,
-      })
-    @Index()
-    endedAt: Date;
-
-
-}
+import { Column, CreateDateColumn, Entity, Index, JoinColumn, JoinTable, ManyToOne, OneToMany, OneToOne, PrimaryColumn, UpdateDateColumn } from "typeorm";
+import { SectorInstance } from "./sector-instance.entities";
 
 @Entity()
 export class ProcessInstance{
@@ -61,28 +15,35 @@ export class ProcessInstance{
     @Column()
     description: string;
 
-    @OneToOne(() => ProcessType, {eager: true})
-    @JoinColumn({referencedColumnName: "name"})
+    @ManyToOne(() => ProcessType, {eager: true})
+    @JoinColumn()
     processType: ProcessType;
 
     @OneToMany(() => SectorInstance, (sectorInstance)=> sectorInstance.process, {eager: true})
     @JoinTable()
+    // @JoinTable({
+    //     name: "sector_instance_in_process_instance",
+    //     joinColumns: [
+    //         {name: "processInstanceId", referencedColumnName: "instanceId"},
+    //         {name: "processInstanceName", referencedColumnName: "name"}
+    //     ],
+    //     inverseJoinColumns: [
+    //         {name: "sectorId", referencedColumnName: "instanceId"},
+    //         {name: "sectorName", referencedColumnName: "name"}
+    //     ]
+    // })
     sectorInstances: SectorInstance[];
 
     @Column("simple-array")
     sectorsOrder: string[]
 
-    @OneToOne(() => User, {eager: true})
-    @JoinColumn([
-        {name: "creatorId", referencedColumnName: "id"},
-        {name: "creatorName", referencedColumnName: "fullname"}
-    ])
+    @ManyToOne(() => User, {eager: true})
+    @JoinColumn({name: "creatorId", referencedColumnName: "id"})
     creator: User;
 
     @OneToOne(()=> Bed, {eager:true})
     @JoinColumn([
-        {name: "DepartmentId", referencedColumnName: "departmentId"},
-        {name: "BedID", referencedColumnName: "ID"}
+        {name: "bedId", referencedColumnName: "id"}
     ])
     bed: Bed;
 
@@ -96,6 +57,5 @@ export class ProcessInstance{
         type: 'datetime',
         nullable: true,
       })
-    @Index()
     endedAt: Date;
 }

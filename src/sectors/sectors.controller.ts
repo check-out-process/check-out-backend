@@ -1,5 +1,5 @@
-import { Controller, Get, Param, Body, Post, Delete, Patch } from '@nestjs/common';
-import { SectorCreationParams, SectorPatchAddUserParams, SectorPatchParams } from './sectors.dto';
+import { Controller, Get, Param, Body, Post, Delete, Patch, Query } from '@nestjs/common';
+import { SectorCreationParams, SectorPatchAddResponsiblesParams, SectorPatchAddUsersParams, SectorPatchParams, SectorQueryParams } from '@checkout/types';
 import { Sector } from './sectors.entities';
 import { SectorsService } from './sectors.service';
 
@@ -15,8 +15,13 @@ export class SectorsController {
     @Get(':sectorID')
     public async getSector(@Param() params) : Promise<Sector> {
         let sector: Sector = await this.sectorsService.getSector(params.sectorID);
-        await sector.commitersUsers;
+        await sector.committingUsers;
         return sector
+    }
+
+    @Get('/filter')
+    public async getSectorsByFilter(@Query() params: SectorQueryParams): Promise<Sector[]>{
+        return await this.sectorsService.getSectorsByFilter(params);
     }
 
     @Post()
@@ -47,15 +52,24 @@ export class SectorsController {
             return await this.sectorsService.updateSector(params.sectorID, data);
     }
 
-    @Patch(':sectorID/add-committer')
-    public async addCommitterToSector(
+    @Patch(':sectorID/add-committers')
+    public async addCommittersToSector(
         @Param() params,
-        @Body() data: SectorPatchAddUserParams) : Promise<Sector>
+        @Body() data: SectorPatchAddUsersParams) : Promise<Sector>
         {
-            return await this.sectorsService.addComitterToSector(params.sectorID, data);
+            return await this.sectorsService.addComittersToSector(params.sectorID, data);
         }
 
-    @Delete('sectorID')
+    @Patch(':sectorID/add-responsibles')
+    public async addResponsiblesToSector(
+        @Param() params,
+        @Body() data: SectorPatchAddResponsiblesParams) : Promise<Sector>
+        {
+            return await this.sectorsService.addResponsiblesToSector(params.sectorID, data);
+        }
+
+
+    @Delete(':sectorID')
     public async deleteSector(@Param() params) : Promise<Sector> {
         return await this.sectorsService.deleteSector(params.sectorID);
     }

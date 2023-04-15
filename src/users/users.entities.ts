@@ -19,6 +19,9 @@ export class User {
     @Column()
     role: Role;
 
-    @ManyToMany(() => Sector, (sector) => sector.commitersUsers)
+    @ManyToMany(() => Sector, (sector) => sector.committingUsers)
     sectors: Promise<Sector[]>;
+
+    @ManyToMany(() => Sector, (sector) => sector.responsibleUsers)
+    sectors_in_responsibility: Promise<Sector[]>
 }

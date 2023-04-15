@@ -4,6 +4,7 @@ import { RoomCreationParams, RoomPatchParams } from '@checkout/types';
 import { randomUUID } from 'crypto';
 import { Repository } from 'typeorm';
 import * as _ from 'lodash';
+import { createOrUpdateObjectFromParams } from 'src/common/utils';
 
 @Injectable()
 export class RoomsService {
@@ -42,10 +43,7 @@ export class RoomsService {
         let newRoom : Room = this.roomsRepo.create()
         this.validateDepartmentExist(departmentId);
         newRoom.departmentId = departmentId;
-        const parameters : string[] = Object.keys(roomDetails);
-        parameters.forEach((parameter) => {
-            newRoom[parameter] = roomDetails[parameter];
-        });
+        newRoom = createOrUpdateObjectFromParams(newRoom, roomDetails);
         newRoom.id = randomUUID();
         this.roomsRepo.save(newRoom);
         return newRoom;
@@ -53,10 +51,7 @@ export class RoomsService {
 
     public async updateRoom(id: string, departmentId: string, roomUpdatedDetails: RoomPatchParams) : Promise<Room> {
         let room : Room = await this.getRoomByID(id, departmentId);
-        const parameters : string[] = Object.keys(roomUpdatedDetails);
-        parameters.forEach((parameter) => {
-            room[parameter] = roomUpdatedDetails[parameter]
-        });
+        room = createOrUpdateObjectFromParams(room, roomUpdatedDetails);
         this.roomsRepo.save(room);
         return room;
     }

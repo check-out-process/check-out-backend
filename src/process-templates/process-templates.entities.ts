@@ -1,6 +1,5 @@
 import { Sector } from "src/sectors/sectors.entities";
-import { User } from "src/users/users.entities";
-import { Column, CreateDateColumn, Entity, Generated, Index, JoinColumn, JoinTable, ManyToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, Entity, Generated, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToOne, PrimaryColumn } from "typeorm";
 
 
 @Entity()
@@ -14,6 +13,10 @@ export class ProcessType {
 
     @Column({unique: true})
     name: string;
+
+    @ManyToMany(() => Sector, (sector) => sector.processTypes)
+    relatedSectors: Sector[];
+
 }
 
 @Entity()
@@ -27,12 +30,23 @@ export class ProcessTemplate {
     @Column()
     description: string;
 
-    @OneToOne(() => ProcessType, {eager: true})
+    @ManyToOne(() => ProcessType, {eager: true})
     @JoinColumn()
     processType: ProcessType;
 
     @ManyToMany(() => Sector, (sector) => sector.relatedProcesses, {eager: true})
     @JoinTable()
+    // @JoinTable({
+    //     name: "process_template_related_sectors",
+    //     joinColumns: [
+    //         {name: "process_template_id", referencedColumnName: "id"},
+    //         {name: "process_template_name", referencedColumnName: "name"}
+    //     ],
+    //     inverseJoinColumns: [
+    //         {name: "sector_id", referencedColumnName: "id"},
+    //         {name: "sector_name", referencedColumnName: "name"}
+    //     ]
+    // })
     relatedSectors: Sector[];
 
     @Column("simple-array")

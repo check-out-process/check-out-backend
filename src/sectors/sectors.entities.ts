@@ -1,40 +1,65 @@
 import { ProcessTemplate, ProcessType } from "src/process-templates/process-templates.entities";
 import { User } from "src/users/users.entities";
-import { Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToOne, PrimaryColumn } from "typeorm";
 
 @Entity()
 export class Sector {
     @PrimaryColumn({unique: true})
-    ID: string;
+    id: string;
 
     @Column({unique: true})
-    sectorName: string;
+    name: string;
 
-    // change it to OneToOne 
-    @Column()
-    defaultResponsibleUserId: number;
-
-    // add default responsibles
-
-    @ManyToMany(() => User, (user) => user.sectors)
+    @ManyToOne(()=> User, {eager: true})
+    @JoinColumn()
+    defaultResponsibleUser: User;
+ 
+    @ManyToMany(()=> User, (user) => user.sectors_in_responsibility, {eager:true})
     @JoinTable()
-    commitersUsers: Promise<User[]>; 
+    // @JoinTable({
+    //     name: "sector_responsible_users",
+    //     joinColumns: [
+    //         {name: "sector_id", referencedColumnName: "id"},
+    //         {name: "sector_name", referencedColumnName: "name"}
+    //     ],
+    //     inverseJoinColumns: [
+    //         {name: "responsible_user_id", referencedColumnName: "id"},
+    //         {name: "responsible_user_name", referencedColumnName: "fullname"}
+    //     ]
+    // })
+    responsibleUsers: Promise<User[]>;
+
+    @ManyToMany(() => User, (user) => user.sectors, {eager: true})
+    @JoinTable()
+    // @JoinTable({
+    //     name: "sector_committing_users",
+    //     joinColumns: [
+    //         {name: "sector_id", referencedColumnName: "id"},
+    //         {name: "sector_name", referencedColumnName: "name"}
+    //     ],
+    //     inverseJoinColumns: [
+    //         {name: "user_id", referencedColumnName: "id"},
+    //         {name: "user_name", referencedColumnName: "fullname"}
+    //     ]
+    // })
+    committingUsers: Promise<User[]>; 
 
     @ManyToMany(() => ProcessTemplate, (processTemplate) => processTemplate.relatedSectors)
     relatedProcesses: ProcessTemplate[];
 
-    @PrimaryColumn()
-    processTypes: ProcessType[]
+    @ManyToMany(() => ProcessType, (pt) => pt.relatedSectors, {eager: true})
+    @JoinTable()
+    // @JoinTable({
+    //     name: "sector_process_type",
+    //     joinColumns: [
+    //         {name: "sector_id", referencedColumnName: "id"},
+    //         {name: "sector_name", referencedColumnName: "name"}
+    //     ],
+    //     inverseJoinColumns: [
+    //         {name: "process_type_name", referencedColumnName: "name"},
+    //         {name: "process_type_id", referencedColumnName: "id"}
+    //     ]
+    // })
+    processTypes: ProcessType[];
 
-}
-
-export class SectorResponsible {
-    @PrimaryColumn()
-    ID: string;
-
-    @Column()
-    sectorId: string;
-
-    @Column()
-    userId: number;
 }

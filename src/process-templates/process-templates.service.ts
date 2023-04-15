@@ -63,18 +63,18 @@ export class ProcessTemplatesService {
     private async createOrUpdateProcessTemplateFromData(proc: ProcessTemplate, data: AddProcessTemplateParams | PatchProcessTemplateParams): Promise<ProcessTemplate>{
         const parameters : string[] = Object.keys(data);
         parameters.forEach((parameter) => {
-            if (parameter != "relatedSectorsIds" &&
+            if (parameter != "relatedSectors_ids" &&
             parameter != "processType"){
                 proc[parameter] = data[parameter];
             }
         });
-        if (data.relatedSectorsIds){
-            const idArray: string[] = data.relatedSectorsIds;
+        if (data.relatedSectors_ids){
+            const idArray: string[] = data.relatedSectors_ids;
             let newSectorArray: Sector[] = [];
-            idArray.forEach(async (id: string) => {
-                const sector: Sector = await SectorsHelper.getSectorById(id);
-                newSectorArray.push(sector);
-            })
+            newSectorArray = await Promise.all(idArray.map(async (id: string) => {
+                return await SectorsHelper.getSectorById(id);
+            }))
+            
             proc.relatedSectors = newSectorArray;
             proc.relatedSectorsOrder = idArray;
         }

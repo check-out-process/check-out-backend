@@ -1,10 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Sector } from 'src/sectors/sectors.entities';
-import { SectorsService } from 'src/sectors/sectors.service';
-import { DataSource, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { UserCreationParams, UserPatchAddSectorParams, UserPatchParams } from './users.dto';
 import { User } from './users.entities';
 import { SectorsHelper } from 'src/sectors/sectors.helper';
+import { createOrUpdateObjectFromParams } from 'src/common/utils';
 
 @Injectable()
 export class UsersService {
@@ -24,26 +24,20 @@ export class UsersService {
 
     public async addUser(data: UserCreationParams): Promise<User> {
         let newUser : User = this.usersRepo.create();
-        const parameters : string[] = Object.keys(data);
-        parameters.forEach((parameter) => {
-            newUser[parameter] = data[parameter];
-        });
+        newUser = createOrUpdateObjectFromParams(newUser, data);
         this.usersRepo.save(newUser);
         return newUser;
     }
 
     public async updateUser(userId: number, data: UserPatchParams): Promise<User> {
         let userToUpdate : User = await this.getUserById(userId);
-        const parameters : string[] = Object.keys(data);
-        parameters.forEach((parameter) => {
-            userToUpdate[parameter] = data[parameter];
-        });
+        userToUpdate = createOrUpdateObjectFromParams(userToUpdate, data);
         this.usersRepo.save(userToUpdate);
         return userToUpdate;
     }
 
     public async addSectorToUser(userId: number, data: UserPatchAddSectorParams): Promise<User> {
-        const sector : Sector = await SectorsHelper.getSectorById(data.sectorID);
+        const sector : Sector = await SectorsHelper.getSectorById(data.sectorId);
         let user : User = await this.getUserById(userId);
         (await user.sectors).push(sector);
         this.usersRepo.save(user);

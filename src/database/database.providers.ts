@@ -10,7 +10,7 @@ export const databaseProviders = [
         port: 1433,
         username: 'sa',
         password: 'Password1',
-        database: 'keeper-test',
+        database: 'CheckOut',
         entities: [
           __dirname + '/../**/*.entities.js',
         ],

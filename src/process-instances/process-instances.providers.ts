@@ -1,5 +1,6 @@
 import {DataSource} from 'typeorm'
-import {ProcessInstance, SectorInstance} from './process-instances.entities'
+import {ProcessInstance} from './process-instances.entities'
+import { SectorInstance } from './sector-instance.entities';
 
 export const processProviders = [
     {

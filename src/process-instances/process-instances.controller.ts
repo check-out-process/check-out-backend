@@ -1,4 +1,4 @@
-import { createProcessInstanceFromDataParams } from '@checkout/types';
+import { CreateProcessInstanceFromDataParams } from '@checkout/types';
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { ProcessInstance } from './process-instances.entities';
 import { ProcessInstancesService } from './process-instances.service';
@@ -18,7 +18,7 @@ export class ProcessInstancesController {
     }
 
     @Post()
-    public async createProcessInstance(@Body() data: createProcessInstanceFromDataParams): Promise<ProcessInstance> {
+    public async createProcessInstance(@Body() data: CreateProcessInstanceFromDataParams): Promise<ProcessInstance> {
         return await this.processInstancesService.createProcessInstanceFromData(data);
     }
 }

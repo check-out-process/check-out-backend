@@ -1,16 +1,19 @@
-import { createProcessInstanceFromDataParams, createProcessInstanceFromTemplateParams, newSectorInstanceData, Status } from '@checkout/types';
+import { CreateProcessInstanceFromDataParams, NewSectorInstanceData, Status } from '@checkout/types';
 import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { Bed } from 'src/beds/beds.entities';
 import { BedsHelper } from 'src/beds/beds.helper';
-import { ProcessTemplate, ProcessType } from 'src/process-templates/processes.entities';
-import { ProcessTemplatesService } from 'src/process-templates/processes.service';
+import { ProcessType } from 'src/process-templates/process-templates.entities';
+import { ProcessTemplatesService } from 'src/process-templates/process-templates.service';
 import { Sector } from 'src/sectors/sectors.entities';
 import { SectorsHelper } from 'src/sectors/sectors.helper';
 import { User } from 'src/users/users.entities';
 import { UsersHelper } from 'src/users/users.helper';
 import { Repository } from 'typeorm';
-import { ProcessInstance, SectorInstance } from './process-instances.entities';
+import { ProcessInstance} from './process-instances.entities';
+import { SectorInstance } from './sector-instance.entities';
+import { ProcessTemplatesHelper } from 'src/process-templates/process-templates.helper';
+
 
 @Injectable()
 export class ProcessInstancesService {
@@ -19,9 +22,7 @@ export class ProcessInstancesService {
         private processInstanceRepo: Repository<ProcessInstance>,
 
         @Inject('SECTOR_INSTANCE_REPOSITORY')
-        private sectorInstanceRepo: Repository<SectorInstance>,
-
-        private processTemplatesService: ProcessTemplatesService
+        private sectorInstanceRepo: Repository<SectorInstance>
     ){}
 
     public async getAllProcessInstances(): Promise<ProcessInstance[]>{
@@ -46,18 +47,21 @@ export class ProcessInstancesService {
         return sectorInstances;
     }
 
-    public async createProcessInstanceFromData(data: createProcessInstanceFromDataParams): Promise<ProcessInstance>{
+    public async createProcessInstanceFromData(data: CreateProcessInstanceFromDataParams): Promise<ProcessInstance>{
         let processInstance: ProcessInstance = this.processInstanceRepo.create();
         let sectorInstances: SectorInstance[] = [];
         let orderedSectorInstances: string[] = [];
         const bed: Bed = await BedsHelper.getBedById(data.departmentId, data.roomId, data.bedId);
-        data.ordered_sectors.forEach(async (newInstanceData) => {
-            const newSectorInstance = await this.createSectorInstance(newInstanceData, bed);
+
+        for (let i = 0; i<data.orderedSectors.length; i++){
+            const sectorInstanceData: NewSectorInstanceData = data.orderedSectors[i];
+            const newSectorInstance = await this.createSectorInstance(sectorInstanceData, bed);
             sectorInstances.push(newSectorInstance);
-            orderedSectorInstances.push(newInstanceData.sector_id);
-        })
-        const processType: ProcessType = await this.processTemplatesService.getProcessTypeByID(data.processType)
-        const creator: User = await UsersHelper.getUserById(data.creator_id);
+            orderedSectorInstances.push(newSectorInstance.instanceId);
+        }
+
+        const processType: ProcessType = await ProcessTemplatesHelper.getProcessTypeById(data.processType)
+        const creator: User = await UsersHelper.getUserById(data.creatorId);
         processInstance.bed = bed;
         processInstance.instanceId = randomUUID();
         processInstance.sectorsOrder = orderedSectorInstances;
@@ -65,6 +69,7 @@ export class ProcessInstancesService {
         processInstance.creator = creator;
         processInstance.name = data.name;
         processInstance.description = data.description;
+        processInstance.processType = processType;
         
         return await this.processInstanceRepo.save(processInstance);
 
@@ -83,19 +88,19 @@ export class ProcessInstancesService {
     //     })
     // }
 
-    private async createSectorInstance(data: newSectorInstanceData, bed: Bed): Promise<SectorInstance> {
-        const commitingWorker : User = await UsersHelper.getUserById(data.worker_id);
-        const responsiblePerson: User = await UsersHelper.getUserById(data.responsible_user_id);
-        const sector: Sector = await SectorsHelper.getSectorById(data.sector_id);
+    private async createSectorInstance(data: NewSectorInstanceData, bed: Bed): Promise<SectorInstance> {
+        const commitingWorker : User = await UsersHelper.getUserById(data.workerId);
+        const responsiblePerson: User = await UsersHelper.getUserById(data.responsibleUserId);
+        const sector: Sector = await SectorsHelper.getSectorById(data.sectorId);
         
         let newSectorInstance: SectorInstance = await this.sectorInstanceRepo.create();
         newSectorInstance.instanceId = randomUUID();
-        newSectorInstance.sectorId = data.sector_id;
+        newSectorInstance.sectorId = data.sectorId;
         newSectorInstance.status = Status.Waiting;
         newSectorInstance.responsiblePerson = responsiblePerson;
         newSectorInstance.commitingWorker = commitingWorker;
         newSectorInstance.bed = bed;
-        newSectorInstance.name = sector.sectorName;
+        newSectorInstance.name = sector.name;
 
         return newSectorInstance;
     }

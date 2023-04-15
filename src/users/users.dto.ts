@@ -31,5 +31,5 @@ export class UserPatchParams {
 
 export class UserPatchAddSectorParams {
     @IsString()
-    sectorID: string
+    sectorId: string
 }

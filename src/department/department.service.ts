@@ -3,6 +3,7 @@ import { DepartmentCreationParams, DepartmentPatchParams } from '@checkout/types
 import { randomUUID } from 'crypto';
 import { Department } from './department.entities';
 import { Repository } from 'typeorm';
+import { createOrUpdateObjectFromParams } from 'src/common/utils';
 
 @Injectable()
 export class DepartmentService {
@@ -27,12 +28,9 @@ export class DepartmentService {
         return department;
     }
 
-    public async addDepartment(department : DepartmentCreationParams) : Promise<Department>{
+    public async addDepartment(data : DepartmentCreationParams) : Promise<Department>{
         let newDepartment : Department = this.departmentRepo.create();
-        const parameters : string[] = Object.keys(department);
-        parameters.forEach((parameter) => {
-            newDepartment[parameter] = department[parameter];
-        });
+        newDepartment = createOrUpdateObjectFromParams(newDepartment, data);
         newDepartment.id = randomUUID();
         this.departmentRepo.save(newDepartment);
         return newDepartment;
@@ -46,10 +44,7 @@ export class DepartmentService {
 
     public async updateDepartment(id : string, data : DepartmentPatchParams) : Promise<Department> {
         let department : Department = await this.getDepartmentByID(id);
-        const parameters : string[] = Object.keys(data);
-        parameters.forEach((parameter) => {
-            department[parameter] = data[parameter];
-        });
+        department = createOrUpdateObjectFromParams(department, data);
         this.departmentRepo.save(department);
         return department;
     }

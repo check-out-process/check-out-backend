@@ -4,6 +4,7 @@ import { QueryFailedError, Repository } from 'typeorm';
 import { BedCreationParams, BedPatchParams } from '@checkout/types';
 import { Bed } from './beds.entities';
 import * as _ from 'lodash';
+import { createOrUpdateObjectFromParams } from 'src/common/utils';
 
 @Injectable()
 export class BedsService {
@@ -34,14 +35,11 @@ export class BedsService {
         }
     }
 
-    public async addBed(roomId: string, departmentId: string, bed : BedCreationParams) : Promise<Bed>{
+    public async addBed(roomId: string, departmentId: string, data : BedCreationParams) : Promise<Bed>{
         let newBed : Bed = this.bedRepo.create();
         newBed.roomId = roomId;
         newBed.departmentId = departmentId;
-        const parameters : string[] = Object.keys(bed);
-        parameters.forEach((parameter) => {
-            newBed[parameter] = bed[parameter];
-        });
+        newBed = createOrUpdateObjectFromParams(newBed, data);
         newBed.id = randomUUID();
         try {
             this.bedRepo.save(newBed);
@@ -66,10 +64,7 @@ export class BedsService {
 
     public async updateBed(id: string, roomId: string, data : BedPatchParams) : Promise<Bed> {
         let bed = await this.getBedByID(id);
-        const parameters : string[] = Object.keys(data);
-        parameters.forEach((parameter) => {
-            bed[parameter] = data[parameter];
-        });
+        bed = createOrUpdateObjectFromParams(bed, data)
         this.bedRepo.save(bed);
         return bed;
     }
