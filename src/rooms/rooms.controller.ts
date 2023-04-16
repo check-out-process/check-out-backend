@@ -3,7 +3,7 @@ import { RoomsService } from './rooms.service';
 import { Room } from './rooms.entities';
 import { RoomCreationParams, RoomPatchParams } from '@checkout/types';
 
-@Controller(':departmentId/rooms')
+@Controller('/departments/:departmentId/rooms')
 export class RoomsController {
     constructor(private roomsService: RoomsService){}
 

@@ -19,7 +19,7 @@ export class ProcessInstance{
     @JoinColumn()
     processType: ProcessType;
 
-    @OneToMany(() => SectorInstance, (sectorInstance)=> sectorInstance.process, {eager: true})
+    @OneToMany(() => SectorInstance, (sectorInstance)=> sectorInstance.process, {eager: true, cascade: true})
     @JoinTable()
     // @JoinTable({
     //     name: "sector_instance_in_process_instance",

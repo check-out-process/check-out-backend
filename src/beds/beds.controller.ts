@@ -3,7 +3,7 @@ import { BedCreationParams, BedPatchParams } from '@checkout/types';
 import { Bed } from './beds.entities';
 import { BedsService } from './beds.service';
 
-@Controller(':departmentId/rooms/:roomId/beds')
+@Controller('/departments/:departmentId/rooms/:roomId/beds')
 export class BedsController {
     constructor(private bedsService : BedsService) {}
 
