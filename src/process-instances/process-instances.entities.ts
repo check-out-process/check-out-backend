@@ -15,6 +15,12 @@ export class ProcessInstance{
     @Column()
     description: string;
 
+    @Column()
+    departmentId: string;
+
+    @Column()
+    roomId: string;
+
     @ManyToOne(() => ProcessType, {eager: true})
     @JoinColumn()
     processType: ProcessType;
