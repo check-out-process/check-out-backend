@@ -1,6 +1,7 @@
-import { Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from "typeorm";
-import {Role} from '@checkout/types'
+import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, PrimaryColumn } from "typeorm";
 import { Sector } from "src/sectors/sectors.entities";
+import { Job } from "src/jobs/jobs.entities";
+import { Role } from "src/roles/roles.entities";
 
 @Entity()
 export class User {
@@ -13,10 +14,12 @@ export class User {
     @Column({unique: true})
     username : string;
 
-    @Column({nullable: true})
-    job: number;
+    @ManyToOne(() => Job, {eager: true})
+    @JoinColumn()
+    job: Job;
 
-    @Column()
+    @ManyToOne(() => Role, {eager: true})
+    @JoinColumn()
     role: Role;
 
     @ManyToMany(() => Sector, (sector) => sector.committingUsers)

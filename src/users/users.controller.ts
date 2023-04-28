@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
-import { UserCreationParams, UserPatchAddSectorParams, UserPatchParams } from './users.dto';
+import { UserCreationParams, UserPatchAddSectorParams, UserPatchParams } from '@checkout/types';
 import { User } from './users.entities';
 import { UsersService } from './users.service';
 

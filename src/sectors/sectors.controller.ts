@@ -15,7 +15,6 @@ export class SectorsController {
     @Get(':sectorID')
     public async getSector(@Param() params) : Promise<Sector> {
         let sector: Sector = await this.sectorsService.getSector(params.sectorID);
-        await sector.committingUsers;
         return sector
     }
 

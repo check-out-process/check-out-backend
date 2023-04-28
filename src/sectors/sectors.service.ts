@@ -142,10 +142,10 @@ export class SectorsService {
             }))
         switch(action){
             case 'committer':
-                sector.committingUsers = Promise.resolve(users);
+                sector.committingUsers = users;
                 break;
             case 'responsible':
-                sector.responsibleUsers = Promise.resolve(users);
+                sector.responsibleUsers = users;
                 break;
         }
         return sector;

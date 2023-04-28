@@ -1,4 +1,4 @@
-import { CreateProcessInstanceFromDataParams, NewSectorInstanceData, Status } from '@checkout/types';
+import { CreateProcessInstanceFromDataParams, NewSectorInstanceData, ProcessInstanceStatusReturnedParams, Status } from '@checkout/types';
 import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { Bed } from 'src/beds/beds.entities';
@@ -13,6 +13,8 @@ import { Repository } from 'typeorm';
 import { ProcessInstance} from './process-instances.entities';
 import { SectorInstance } from './sector-instance.entities';
 import { ProcessTemplatesHelper } from 'src/process-templates/process-templates.helper';
+import { DepartmentsHelper } from 'src/department/department.helper';
+import { RoomsHelper } from 'src/rooms/rooms.helper';
 
 
 @Injectable()
@@ -26,7 +28,12 @@ export class ProcessInstancesService {
     ){}
 
     public async getAllProcessInstances(): Promise<ProcessInstance[]>{
-        return await this.processInstanceRepo.find();
+        let instances: ProcessInstance[] = await this.processInstanceRepo.find();
+        instances = instances.map(instance => {
+            instance.sectorInstances = this.orderSectors(instance.sectorInstances, instance.sectorsOrder);
+            return instance;
+        })
+        return instances;
     }
 
     public async getAllSectorInstances(): Promise<SectorInstance[]> {
@@ -34,7 +41,9 @@ export class ProcessInstancesService {
     }
 
     public async getProcessInstance(id: string): Promise<ProcessInstance> {
-        return await this.processInstanceRepo.findOne({where: {instanceId: id}});
+        let instance = await this.processInstanceRepo.findOne({where: {instanceId: id}});
+        instance.sectorInstances = this.orderSectors(instance.sectorInstances, instance.sectorsOrder);
+        return instance;
     }
 
     public async getSectorInstance(id: string): Promise<SectorInstance> {
@@ -51,7 +60,7 @@ export class ProcessInstancesService {
         let processInstance: ProcessInstance = this.processInstanceRepo.create();
         let sectorInstances: SectorInstance[] = [];
         let orderedSectorInstances: string[] = [];
-        const bed: Bed = await BedsHelper.getBedById(data.departmentId, data.roomId, data.bedId);
+        const bed: Bed = await BedsHelper.getBedById(data.bedId);
 
         for (let i = 0; i<data.orderedSectors.length; i++){
             const sectorInstanceData: NewSectorInstanceData = data.orderedSectors[i];
@@ -70,9 +79,40 @@ export class ProcessInstancesService {
         processInstance.name = data.name;
         processInstance.description = data.description;
         processInstance.processType = processType;
+        processInstance.departmentId = data.departmentId;
+        processInstance.roomId = data.roomId;
         
         return await this.processInstanceRepo.save(processInstance);
 
+    }
+
+    public async getProcessStatus(bedId: string): Promise<ProcessInstanceStatusReturnedParams> {
+        let processStatusData: ProcessInstanceStatusReturnedParams;
+        const processInstance: ProcessInstance = await this.processInstanceRepo.createQueryBuilder("processIntance")
+        .leftJoinAndSelect("processIntance.bed", "bed")
+        .where("bed.id = :bedId", {bedId})
+        .execute()
+        processStatusData['name'] = processInstance.name;
+        processStatusData['description'] = processInstance.description;
+        const userName: string = await this.processInstanceRepo.createQueryBuilder("processInstance")
+        .leftJoinAndSelect("process.creator", "creator")
+        .select(["creator.fullname"])
+        .execute();
+        processStatusData['creator'] = userName;
+        processStatusData['department'] = await DepartmentsHelper.getDepartmentById(processInstance.departmentId);
+        processStatusData['room'] = await RoomsHelper.getRoomById(processInstance.departmentId, processInstance.roomId);
+        processStatusData['processStatus'] = processInstance.status;
+        processStatusData['sectorInstances'] = processInstance.sectorInstances;
+        let currentSectorInstance = null;
+        processInstance.sectorInstances.every(instance => {
+            if (instance.status == Status.Done){
+                return true;
+            }
+            currentSectorInstance = instance;
+            return false;
+        })
+        processStatusData['currentSectorInstnace'] = currentSectorInstance;
+        return processStatusData;   
     }
 
     // public async createProcessInstanceFromTemplate(data: createProcessInstanceFromTemplateParams): Promise<ProcessInstance> {
@@ -103,5 +143,25 @@ export class ProcessInstancesService {
         newSectorInstance.name = sector.name;
 
         return newSectorInstance;
+    }
+
+    private orderSectors(sectors: SectorInstance[], order: string[]) {
+        if (sectors.length != order.length){
+            // throw err
+        }
+        let instancesOrder: string[] = sectors.map(instance => instance.instanceId);
+        if (JSON.stringify(instancesOrder) === JSON.stringify(order))
+        {
+            return sectors;
+        }
+        let orderedArray: SectorInstance[] = [];
+        order.forEach(instanceId => {
+            const sector: SectorInstance = sectors.find(sec => sec.instanceId == instanceId)
+            if (sector) {orderedArray.push(sector)}
+            else {
+                // think aboud the exception. maybe internal server error?
+            }
+        })
+        return orderedArray;
     }
 }

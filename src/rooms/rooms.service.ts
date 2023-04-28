@@ -45,7 +45,7 @@ export class RoomsService {
         newRoom.departmentId = departmentId;
         newRoom = createOrUpdateObjectFromParams(newRoom, roomDetails);
         newRoom.id = randomUUID();
-        this.roomsRepo.save(newRoom);
+        await this.roomsRepo.save(newRoom);
         return newRoom;
     }
 

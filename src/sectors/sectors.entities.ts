@@ -27,7 +27,7 @@ export class Sector {
     //         {name: "responsible_user_name", referencedColumnName: "fullname"}
     //     ]
     // })
-    responsibleUsers: Promise<User[]>;
+    responsibleUsers: User[];
 
     @ManyToMany(() => User, (user) => user.sectors, {eager: true})
     @JoinTable()
@@ -42,7 +42,7 @@ export class Sector {
     //         {name: "user_name", referencedColumnName: "fullname"}
     //     ]
     // })
-    committingUsers: Promise<User[]>; 
+    committingUsers: User[]; 
 
     @ManyToMany(() => ProcessTemplate, (processTemplate) => processTemplate.relatedSectors)
     relatedProcesses: ProcessTemplate[];

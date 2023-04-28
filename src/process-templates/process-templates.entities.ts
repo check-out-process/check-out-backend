@@ -51,4 +51,5 @@ export class ProcessTemplate {
 
     @Column("simple-array")
     relatedSectorsOrder: string[]
+
 }

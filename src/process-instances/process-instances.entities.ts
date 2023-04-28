@@ -3,6 +3,7 @@ import { ProcessType } from "src/process-templates/process-templates.entities";
 import { User } from "src/users/users.entities";
 import { Column, CreateDateColumn, Entity, Index, JoinColumn, JoinTable, ManyToOne, OneToMany, OneToOne, PrimaryColumn, UpdateDateColumn } from "typeorm";
 import { SectorInstance } from "./sector-instance.entities";
+import { Status } from "@checkout/types";
 
 @Entity()
 export class ProcessInstance{
@@ -39,6 +40,12 @@ export class ProcessInstance{
     //     ]
     // })
     sectorInstances: SectorInstance[];
+
+    @Column({
+        type: 'varchar',
+        default: Status.Waiting
+    })
+    status: Status;
 
     @Column("simple-array")
     sectorsOrder: string[]
