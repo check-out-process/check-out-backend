@@ -35,19 +35,16 @@ export class SectorInstance {
     bed: Bed;
 
     @CreateDateColumn({type: 'datetime'})
-    //     @CreateDateColumn()
-    
-        createdAt: Date;
-    
-        @UpdateDateColumn({type: 'datetime'})
-    //     @UpdateDateColumn()
-        updatedAt: Date;
-    
-        @Column({
-            type: 'datetime',
-            nullable: true,
-          })
-        endedAt: Date;
+    createdAt: Date;
+
+    @UpdateDateColumn({type: 'datetime'})
+    updatedAt: Date;
+
+    @Column({
+        type: 'datetime',
+        nullable: true,
+        })
+    endedAt: Date;
 
 
 }

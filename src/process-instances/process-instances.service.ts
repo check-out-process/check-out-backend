@@ -15,6 +15,7 @@ import { SectorInstance } from './sector-instance.entities';
 import { ProcessTemplatesHelper } from 'src/process-templates/process-templates.helper';
 import { DepartmentsHelper } from 'src/department/department.helper';
 import { RoomsHelper } from 'src/rooms/rooms.helper';
+import { log } from 'console';
 
 
 @Injectable()
@@ -87,23 +88,28 @@ export class ProcessInstancesService {
     }
 
     public async getProcessStatus(bedId: string): Promise<ProcessInstanceStatusReturnedParams> {
-        let processStatusData: ProcessInstanceStatusReturnedParams;
-        const processInstance: ProcessInstance = await this.processInstanceRepo.createQueryBuilder("processIntance")
-        .leftJoinAndSelect("processIntance.bed", "bed")
+        let processStatusData: ProcessInstanceStatusReturnedParams = new ProcessInstanceStatusReturnedParams();
+        const processInstance: ProcessInstance = await this.processInstanceRepo.createQueryBuilder("processInstance")
+        .leftJoinAndSelect("processInstance.bed", "bed")
+        .leftJoinAndSelect("processInstance.sectorInstances", "sectorInstances")
+        .leftJoinAndSelect("processInstance.processType", "processType")
         .where("bed.id = :bedId", {bedId})
-        .execute()
-        processStatusData['name'] = processInstance.name;
-        processStatusData['description'] = processInstance.description;
+        .getOne();
+        log(processInstance)
+        processStatusData.name = processInstance.name;
+        processStatusData.description = processInstance.description;
         const userName: string = await this.processInstanceRepo.createQueryBuilder("processInstance")
-        .leftJoinAndSelect("process.creator", "creator")
+        .leftJoinAndSelect("processInstance.creator", "creator")
         .select(["creator.fullname"])
-        .execute();
-        processStatusData['creator'] = userName;
-        processStatusData['department'] = await DepartmentsHelper.getDepartmentById(processInstance.departmentId);
-        processStatusData['room'] = await RoomsHelper.getRoomById(processInstance.departmentId, processInstance.roomId);
-        processStatusData['processStatus'] = processInstance.status;
-        processStatusData['sectorInstances'] = processInstance.sectorInstances;
-        let currentSectorInstance = null;
+        .getRawOne()
+        log(userName)
+        processStatusData.creator = userName;
+        processStatusData.department = await DepartmentsHelper.getDepartmentById(processInstance.departmentId);
+        processStatusData.room = await RoomsHelper.getRoomById(processInstance.departmentId, processInstance.roomId);
+        processStatusData.processStatus = processInstance.status;
+        processStatusData.processType = processInstance.processType.name;
+        processStatusData.sectorInstances = processInstance.sectorInstances;
+        let currentSectorInstance: SectorInstance = null;
         processInstance.sectorInstances.every(instance => {
             if (instance.status == Status.Done){
                 return true;
@@ -111,7 +117,7 @@ export class ProcessInstancesService {
             currentSectorInstance = instance;
             return false;
         })
-        processStatusData['currentSectorInstnace'] = currentSectorInstance;
+        processStatusData.currentSectorInstance = currentSectorInstance;
         return processStatusData;   
     }
 
