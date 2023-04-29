@@ -14,6 +14,9 @@ export class User {
     @Column({unique: true})
     username : string;
 
+    @Column()
+    phoneNumber: string;
+
     @ManyToOne(() => Job, {eager: true})
     @JoinColumn()
     job: Job;
