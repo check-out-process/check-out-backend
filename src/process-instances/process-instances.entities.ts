@@ -42,8 +42,7 @@ export class ProcessInstance{
     sectorInstances: SectorInstance[];
 
     @Column({
-        type: 'varchar',
-        default: Status.Waiting
+        default: Status.In_Progress
     })
     status: Status;
 

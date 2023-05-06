@@ -1,4 +1,4 @@
-import { CreateProcessInstanceFromDataParams, NewSectorInstanceData, ProcessInstanceStatusReturnedParams, Status } from '@checkout/types';
+import { CreateProcessInstanceFromDataParams, NewSectorInstanceData, ProcessInstanceStatusReturnedParams, Status, UpdateSectorStatusParams } from '@checkout/types';
 import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { Bed } from 'src/beds/beds.entities';
@@ -42,6 +42,7 @@ export class ProcessInstancesService {
     }
 
     public async getProcessInstance(id: string): Promise<ProcessInstance> {
+        //ToDo: handle exception
         let instance = await this.processInstanceRepo.findOne({where: {instanceId: id}});
         instance.sectorInstances = this.orderSectors(instance.sectorInstances, instance.sectorsOrder);
         return instance;
@@ -87,38 +88,115 @@ export class ProcessInstancesService {
 
     }
 
+
     public async getProcessStatus(bedId: string): Promise<ProcessInstanceStatusReturnedParams> {
         let processStatusData: ProcessInstanceStatusReturnedParams = new ProcessInstanceStatusReturnedParams();
-        const processInstance: ProcessInstance = await this.processInstanceRepo.createQueryBuilder("processInstance")
-        .leftJoinAndSelect("processInstance.bed", "bed")
-        .leftJoinAndSelect("processInstance.sectorInstances", "sectorInstances")
-        .leftJoinAndSelect("processInstance.processType", "processType")
-        .where("bed.id = :bedId", {bedId})
-        .getOne();
-        log(processInstance)
+        const processInstance = await this.getProcessInstanceOfBed(bedId);
+        processInstance.sectorInstances = this.orderSectors(processInstance.sectorInstances, processInstance.sectorsOrder);
+
+        processStatusData.processInstanceId = processInstance.instanceId;
         processStatusData.name = processInstance.name;
         processStatusData.description = processInstance.description;
-        const userName: string = await this.processInstanceRepo.createQueryBuilder("processInstance")
-        .leftJoinAndSelect("processInstance.creator", "creator")
-        .select(["creator.fullname"])
-        .getRawOne()
-        log(userName)
-        processStatusData.creator = userName;
+        processStatusData.creator = processInstance.creator.fullname;
         processStatusData.department = await DepartmentsHelper.getDepartmentById(processInstance.departmentId);
         processStatusData.room = await RoomsHelper.getRoomById(processInstance.departmentId, processInstance.roomId);
         processStatusData.processStatus = processInstance.status;
         processStatusData.processType = processInstance.processType.name;
         processStatusData.sectorInstances = processInstance.sectorInstances;
-        let currentSectorInstance: SectorInstance = null;
-        processInstance.sectorInstances.every(instance => {
-            if (instance.status == Status.Done){
-                return true;
-            }
-            currentSectorInstance = instance;
-            return false;
-        })
-        processStatusData.currentSectorInstance = currentSectorInstance;
+        processStatusData.currentSectorInstance = this.getCurrentSectorOfProcessInstace(processInstance);
         return processStatusData;   
+    }
+
+    public async updateProcessStatus(bedId: string, data: UpdateSectorStatusParams): Promise<ProcessInstance> {
+        const processInstance: ProcessInstance = await this.getProcessInstance(data.processInstanceId);
+
+        if (processInstance.bed.id != bedId){
+            //ToDo: throw exception
+            log("process instance not match to bed error")
+            return;
+        }
+        let currentSectorInstance = this.getCurrentSectorOfProcessInstace(processInstance);
+
+        log("current sector instance")
+
+        log(currentSectorInstance.name)
+        // change it if there`s a feature of parallel sectors in process
+        if (currentSectorInstance.instanceId != data.sectorInstanceId ){
+            //ToDo: throw exception
+            log("sector instance not match error")
+            return;
+        }
+
+        if (currentSectorInstance.commitingWorker.id != data.userId && data.userId != currentSectorInstance.responsiblePerson.id){
+            //ToDo: throw restricted exception
+            log("restricted")
+            return;
+        }
+
+        this.updateSectorInstanceStatus(currentSectorInstance, data.status);
+        log(this.getCurrentSectorOfProcessInstace(processInstance).name)
+        this.validateProcessStatus(processInstance);
+
+        return await this.processInstanceRepo.save(processInstance)
+
+    }
+
+    private async getProcessInstanceOfBed(bedId: string): Promise<ProcessInstance> {
+        const processInstance = await this.processInstanceRepo.createQueryBuilder("processInstance")
+        .leftJoinAndSelect("processInstance.bed", "bed")
+        .leftJoinAndSelect("processInstance.sectorInstances", "sectorInstances")
+        .leftJoinAndSelect("processInstance.processType", "processType")
+        .leftJoinAndSelect("processInstance.creator", "creator")
+        .where("bed.id = :bedId", {bedId})
+        .getOne()
+        //.select("processInstance.instanceId")
+        //.getRawOne();
+
+        return processInstance;
+        //return await this.processInstanceRepo.findOne({where: {instanceId: processInstance.processInstance_instanceId}});
+    }
+
+    private updateSectorInstanceStatus(sectorInstance: SectorInstance, status: Status): void{
+        log(typeof(sectorInstance.status))
+        log(typeof(status))
+        if (sectorInstance.status > status){
+            //ToDo: throw exception
+            log("status error")
+            return
+        }
+
+        if (sectorInstance.status == status){
+            log("status equal error")
+            return;
+        }
+
+        sectorInstance.status = status;
+        log()
+        if (status == Status.Done){
+            sectorInstance.endedAt = new Date()
+        }
+    }
+
+    private getCurrentSectorOfProcessInstace(processInstance: ProcessInstance): SectorInstance{
+        let currentSectorInstance: SectorInstance = null;
+        for(let instance of processInstance.sectorInstances){
+            if (instance.status != Status.Done){
+                currentSectorInstance = instance;
+                break;
+            }
+        }
+        return currentSectorInstance;
+    }
+    
+    private validateProcessStatus(processInstance: ProcessInstance): boolean{
+
+        let isDone: boolean = processInstance.sectorInstances.every(instance => instance.status == Status.Done)
+        if(isDone){
+            //ToDo: fix bug of server / pc timestamp diff
+            processInstance.endedAt = new Date();
+            processInstance.status = Status.Done;
+        }
+        return isDone;
     }
 
     // public async createProcessInstanceFromTemplate(data: createProcessInstanceFromTemplateParams): Promise<ProcessInstance> {

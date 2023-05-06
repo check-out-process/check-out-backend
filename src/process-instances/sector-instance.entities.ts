@@ -20,7 +20,6 @@ export class SectorInstance {
     process: ProcessInstance;
 
     @Column({
-        type: 'varchar',
         default: Status.Waiting
     })
     status: Status;
