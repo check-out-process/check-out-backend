@@ -16,6 +16,9 @@ export class User {
 
     @Column()
     phoneNumber: string;
+       
+    @Column()
+    password: string;
 
     @ManyToOne(() => Job, {eager: true})
     @JoinColumn()

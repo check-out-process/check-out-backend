@@ -8,9 +8,10 @@ import { ProcessTemplatesModule } from './process-templates/process-templates.mo
 import { ProcessInstancesModule } from './process-instances/process-instances.module';
 import { JobsModule } from './jobs/jobs.module';
 import { RolesModule } from './roles/roles.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [DepartmentModule, RoomsModule, BedsModule, SectorsModule, UsersModule, ProcessTemplatesModule, ProcessInstancesModule, JobsModule, RolesModule],
+  imports: [AuthModule, DepartmentModule, RoomsModule, BedsModule, SectorsModule, UsersModule, ProcessTemplatesModule, ProcessInstancesModule, JobsModule, RolesModule],
   controllers: [],
 
 })

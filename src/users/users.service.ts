@@ -29,6 +29,10 @@ export class UsersService {
         return await this.usersRepo.findOne({where : {id: userId}});
     }
 
+    public async getUserByPhoneNumber(phoneNumber: string): Promise<User> {
+        return await this.usersRepo.findOne({where : {phoneNumber: phoneNumber}});
+    }
+
     public async addUser(data: UserCreationParams): Promise<User> {
         let newUser : User = this.usersRepo.create();
         newUser = await this.createOrUpdateUserFromParams(newUser, data);
