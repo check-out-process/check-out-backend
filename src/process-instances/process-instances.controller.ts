@@ -1,4 +1,4 @@
-import { CreateProcessInstanceFromDataParams, ProcessInstanceStatusReturnedParams, UpdateSectorStatusParams } from '@checkout/types';
+import { CreateProcessInstanceFromDataParams, GetProcessInstanceStatusParams, ProcessInstanceStatusReturnedParams, UpdateSectorStatusParams } from '@checkout/types';
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { ProcessInstance } from './process-instances.entities';
 import { ProcessInstancesService } from './process-instances.service';
@@ -23,8 +23,8 @@ export class ProcessInstancesController {
     }
 
     @Get(':bedId/update-status')
-    public async getProcessStatus(@Param() params): Promise<ProcessInstanceStatusReturnedParams>{
-        return await this.processInstancesService.getProcessStatus(params.bedId);
+    public async getProcessStatus(@Param() params, @Body() data: GetProcessInstanceStatusParams): Promise<ProcessInstanceStatusReturnedParams>{
+        return await this.processInstancesService.getProcessStatus(params.bedId, data);
     }
 
     @Patch(':bedId/update-status')

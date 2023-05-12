@@ -1,4 +1,4 @@
-import { CreateProcessInstanceFromDataParams, NewSectorInstanceData, ProcessInstanceStatusReturnedParams, Status, UpdateSectorStatusParams } from '@checkout/types';
+import { CreateProcessInstanceFromDataParams, GetProcessInstanceStatusParams, NewSectorInstanceData, ProcessInstanceStatusReturnedParams, Status, UpdateSectorStatusParams } from '@checkout/types';
 import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { Bed } from 'src/beds/beds.entities';
@@ -16,6 +16,7 @@ import { ProcessTemplatesHelper } from 'src/process-templates/process-templates.
 import { DepartmentsHelper } from 'src/department/department.helper';
 import { RoomsHelper } from 'src/rooms/rooms.helper';
 import { log } from 'console';
+import { RolesHelper } from 'src/roles/roles.helper';
 
 
 @Injectable()
@@ -89,7 +90,7 @@ export class ProcessInstancesService {
     }
 
 
-    public async getProcessStatus(bedId: string): Promise<ProcessInstanceStatusReturnedParams> {
+    public async getProcessStatus(bedId: string, data: GetProcessInstanceStatusParams): Promise<ProcessInstanceStatusReturnedParams> {
         let processStatusData: ProcessInstanceStatusReturnedParams = new ProcessInstanceStatusReturnedParams();
         const processInstance = await this.getProcessInstanceOfBed(bedId);
         processInstance.sectorInstances = this.orderSectors(processInstance.sectorInstances, processInstance.sectorsOrder);
@@ -103,7 +104,7 @@ export class ProcessInstancesService {
         processStatusData.processStatus = processInstance.status;
         processStatusData.processType = processInstance.processType.name;
         processStatusData.sectorInstances = processInstance.sectorInstances;
-        processStatusData.currentSectorInstance = this.getCurrentSectorOfProcessInstace(processInstance);
+        processStatusData.currentSectorInstance = this.getCurrentSectorOfProcessInstanceOfUser(processInstance, data.userId);
         return processStatusData;   
     }
 
@@ -181,6 +182,19 @@ export class ProcessInstancesService {
         let currentSectorInstance: SectorInstance = null;
         for(let instance of processInstance.sectorInstances){
             if (instance.status != Status.Done){
+                currentSectorInstance = instance;
+                break;
+            }
+        }
+        return currentSectorInstance;
+    }
+    
+    private async getCurrentSectorOfProcessInstanceOfUser(processInstance: ProcessInstance, userId: number): Promise<SectorInstance>{
+        let currentSectorInstance: SectorInstance = null;
+        let user: User = await UsersHelper.getUserById(userId);
+        let isUserAManager: boolean = user.role.name == 'Admin';
+        for(let instance of processInstance.sectorInstances){
+            if (instance.status != Status.Done && (isUserAManager || instance.commitingWorker.id == userId || instance.responsiblePerson.id == userId)){
                 currentSectorInstance = instance;
                 break;
             }
