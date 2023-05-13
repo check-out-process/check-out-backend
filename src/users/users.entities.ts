@@ -1,7 +1,8 @@
-import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
 import { Sector } from "src/sectors/sectors.entities";
 import { Job } from "src/jobs/jobs.entities";
 import { Role } from "src/roles/roles.entities";
+import { Token } from "src/tokens/tokens.entities";
 
 @Entity()
 export class User {
@@ -19,6 +20,10 @@ export class User {
        
     @Column()
     password: string;
+
+    @OneToMany(() => Token, (tokens)=> tokens.userId, {eager: true, cascade: true})
+    @JoinColumn()
+    tokens?: Token[];
 
     @ManyToOne(() => Job, {eager: true})
     @JoinColumn()
