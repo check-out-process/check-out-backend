@@ -1,4 +1,4 @@
-import { Controller,Post, Body, Headers } from '@nestjs/common';
+import { Controller,Post, Body, Delete, Headers } from '@nestjs/common';
 import { LogInParams, UserCreationParams } from '@checkout/types';
 import { AuthService } from './auth.service';
 
@@ -16,7 +16,7 @@ export class AuthController {
         return await this.authService.register(data);
     }
 
-    @Post('logout')
+    @Delete('logout')
     async logOut(@Headers() headers) {
         return await this.authService.logout(headers["x-access-token"]);
     }
