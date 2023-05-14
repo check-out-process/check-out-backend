@@ -1,4 +1,4 @@
-import { CreateProcessInstanceFromDataParams, GetProcessInstanceStatusParams, NewSectorInstanceData, ProcessInstanceStatusReturnedParams, Status, UpdateSectorStatusParams } from '@checkout/types';
+import { CreateProcessInstanceFromDataParams, GetProcessInstanceStatusParams, NewSectorInstanceData, ProcessInstanceStatusReturnedParams, Status, UpdateSectorInstanceParams, UpdateSectorStatusParams } from '@checkout/types';
 import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { Bed } from 'src/beds/beds.entities';
@@ -87,6 +87,21 @@ export class ProcessInstancesService {
         
         return await this.processInstanceRepo.save(processInstance);
 
+    }
+
+    public async updateSectorInstance(data: UpdateSectorInstanceParams, processInstanceId: string, sectorInstanceId: string): Promise<ProcessInstance>{
+        let instance = await this.sectorInstanceRepo.findOne({where: {instanceId: sectorInstanceId}});
+        if (data.status){instance.status = data.status}
+        if (data.commitingWorkerId){
+            const worker = await UsersHelper.getUserById(data.commitingWorkerId);
+            instance.commitingWorker = worker;
+        }
+        if (data.responsiblePersonId){
+            const responsible = await UsersHelper.getUserById(data.responsiblePersonId);
+            instance.responsiblePerson = responsible;
+        }
+        await this.sectorInstanceRepo.save(instance);
+        return await this.processInstanceRepo.findOne({where: {instanceId: processInstanceId}});
     }
 
 
