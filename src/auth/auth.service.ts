@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import * as _ from 'lodash';
 import { UsersService } from 'src/users/users.service';
 import { genSalt, hash, compare } from 'bcrypt';
@@ -16,18 +16,18 @@ export class AuthService {
 
     public async login(logInParams: LogInParams) {
         if (logInParams.phoneNumber == null || logInParams.password == null) {
-            throw new HttpException("bad phoneNumber or password", HttpStatus.BAD_REQUEST);
+            throw new HttpException("phoneNumber or password not correct", HttpStatus.NOT_FOUND);
         }
 
         try {
             const user = await this.userService.getUserByPhoneNumber(logInParams.phoneNumber);
             if (user == null) {
-                throw new HttpException("bad phoneNumber or password", HttpStatus.BAD_REQUEST);
+                throw new HttpException("phoneNumber or password not correct", HttpStatus.NOT_FOUND);
             }
 
             const match = await compare(logInParams.password, user.password);
             if (!match) {
-                throw new HttpException("bad phoneNumber or password", HttpStatus.BAD_REQUEST);
+                throw new HttpException("phoneNumber or password not correct", HttpStatus.NOT_FOUND);
             }
 
             const accessToken = sign(
