@@ -4,7 +4,7 @@ import fetch from 'node-fetch';
 
 export class ProcessTemplatesHelper{
     public static async getProcessTypeById(typeId: number): Promise<ProcessType>{
-        const url = `http://localhost:3000/process-templates/types/${typeId}`;
+        const url = `http://localhost:8080/process-templates/types/${typeId}`;
         const res = await fetch(url);
         if (res.ok){
             const processType : ProcessType = await res.json();
@@ -17,7 +17,7 @@ export class ProcessTemplatesHelper{
     }
 
     public static async getProcessTemplateById(templateId: string): Promise<ProcessTemplate>{
-        const url = `http://localhost:3000/process-templates/${templateId}`;
+        const url = `http://localhost:8080/process-templates/${templateId}`;
         const res = await fetch(url);
         if (res.ok){
             const processTemplate : ProcessTemplate = await res.json();
