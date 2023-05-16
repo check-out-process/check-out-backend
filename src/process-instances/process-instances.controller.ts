@@ -1,7 +1,8 @@
 import { CreateProcessInstanceFromDataParams, GetProcessInstanceStatusParams, ProcessInstanceStatusReturnedParams, UpdateSectorInstanceParams, UpdateSectorStatusParams } from '@checkout/types';
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Headers, Get, Param, Patch, Post } from '@nestjs/common';
 import { ProcessInstance } from './process-instances.entities';
 import { ProcessInstancesService } from './process-instances.service';
+import { verify } from 'jsonwebtoken';
 
 @Controller('process-instances')
 export class ProcessInstancesController {
@@ -28,8 +29,9 @@ export class ProcessInstancesController {
     }
 
     @Get(':bedId/update-status')
-    public async getProcessStatus(@Param() params, @Body() data: GetProcessInstanceStatusParams): Promise<ProcessInstanceStatusReturnedParams>{
-        return await this.processInstancesService.getProcessStatus(params.bedId, data);
+    public async getProcessStatus(@Param() params, @Headers() headers): Promise<ProcessInstanceStatusReturnedParams>{
+        const decoded = verify(headers["x-access-token"], process.env.ACCESS_TOKEN_SECRET);
+        return await this.processInstancesService.getProcessStatus(params.bedId, decoded.id);
     }
 
     @Patch(':bedId/update-status')

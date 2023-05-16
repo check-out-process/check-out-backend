@@ -115,7 +115,7 @@ export class ProcessInstancesService {
     }
 
 
-    public async getProcessStatus(bedId: string, data: GetProcessInstanceStatusParams): Promise<ProcessInstanceStatusReturnedParams> {
+    public async getProcessStatus(bedId: string, userId): Promise<ProcessInstanceStatusReturnedParams> {
         let processStatusData: ProcessInstanceStatusReturnedParams = new ProcessInstanceStatusReturnedParams();
         const processInstance = await this.getProcessInstanceOfBed(bedId);
         processInstance.sectorInstances = this.orderSectors(processInstance.sectorInstances, processInstance.sectorsOrder);
@@ -129,7 +129,7 @@ export class ProcessInstancesService {
         processStatusData.processStatus = processInstance.status;
         processStatusData.processType = processInstance.processType.name;
         processStatusData.sectorInstances = processInstance.sectorInstances;
-        processStatusData.currentSectorInstance = await this.getCurrentSectorOfProcessInstanceOfUser(processInstance, data.userId);
+        processStatusData.currentSectorInstance = await this.getCurrentSectorOfProcessInstanceOfUser(processInstance, userId);
         return processStatusData;
     }
 
