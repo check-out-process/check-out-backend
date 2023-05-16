@@ -7,7 +7,7 @@ import { BedsService } from './beds.service';
 export class BedsController {
     constructor(private bedsService : BedsService) {}
 
-    @Get()
+    @Get('/room/:roomId')
     async getAllBeds(@Param() params) : Promise<Bed[]> {
         return await this.bedsService.getAllBedsOfRoom(params.roomId);
     }

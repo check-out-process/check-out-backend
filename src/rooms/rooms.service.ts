@@ -27,7 +27,7 @@ export class RoomsService {
         }
     }
 
-    public async getRoomByID(id: string, departmentID: string) : Promise<Room>{
+    public async getRoomByID(id: string) : Promise<Room>{
         const roomSelected : Room = await this.roomsRepo.findOne({
             where: {
                 id: id
@@ -50,14 +50,14 @@ export class RoomsService {
     }
 
     public async updateRoom(id: string, departmentId: string, roomUpdatedDetails: RoomPatchParams) : Promise<Room> {
-        let room : Room = await this.getRoomByID(id, departmentId);
+        let room : Room = await this.getRoomByID(id);
         room = createOrUpdateObjectFromParams(room, roomUpdatedDetails);
         this.roomsRepo.save(room);
         return room;
     }
 
     public async deleteRoom(id: string, departmentId: string) : Promise<Room> {
-        const roomToDelete : Room = await this.getRoomByID(id, departmentId);
+        const roomToDelete : Room = await this.getRoomByID(id);
         this.roomsRepo.delete(roomToDelete);
         return roomToDelete;    
     }
