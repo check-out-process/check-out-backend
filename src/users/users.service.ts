@@ -3,14 +3,11 @@ import { Sector } from 'src/sectors/sectors.entities';
 import { Repository } from 'typeorm';
 import { UserCreationParams, UserPatchAddSectorParams, UserPatchParams } from '@checkout/types';
 import { User } from './users.entities';
-import { SectorsHelper } from 'src/sectors/sectors.helper';
-import { createOrUpdateObjectFromParams } from 'src/common/utils';
 import { JobsService } from 'src/jobs/jobs.service';
 import { RolesService } from 'src/roles/roles.service';
 import { Job } from 'src/jobs/jobs.entities';
 import { Role } from 'src/roles/roles.entities';
-import { JobsHelper } from 'src/jobs/jobs.helper';
-import { RolesHelper } from 'src/roles/roles.helper';
+import { SectorsService } from 'src/sectors/sectors.service';
 
 @Injectable()
 export class UsersService {
@@ -18,7 +15,9 @@ export class UsersService {
     constructor(
         @Inject('USER_REPOSITORY')
         private usersRepo: Repository<User>,
-
+        private jobService: JobsService,
+        private roleService: RolesService,
+        private sectorService: SectorsService,
     ) {}
 
     public async getAllUsers() : Promise<User[]> {
@@ -48,7 +47,7 @@ export class UsersService {
     }
 
     public async addSectorToUser(userId: number, data: UserPatchAddSectorParams): Promise<User> {
-        const sector : Sector = await SectorsHelper.getSectorById(data.sectorId);
+        const sector : Sector = await this.sectorService.getSector(data.sectorId);
         let user : User = await this.getUserById(userId);
         (await user.sectors).push(sector);
         this.usersRepo.save(user);
@@ -71,13 +70,13 @@ export class UsersService {
         });
         if (data.jobId){
             //ToDo: try catch
-            const job: Job = await JobsHelper.getJobById(data.jobId);
+            const job: Job = await this.jobService.getJob(data.jobId);
             user.job = job;
         }
 
         if (data.roleId){
             //ToDo: try catch
-            const role: Role = await RolesHelper.getRoleById(data.roleId);
+            const role: Role = await this.roleService.getRoleById(data.roleId);
             user.role = role;
         }
         return user;
