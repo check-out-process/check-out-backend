@@ -2,21 +2,19 @@ import { CreateProcessInstanceFromDataParams, GetProcessInstanceStatusParams, Ne
 import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { Bed } from 'src/beds/beds.entities';
-import { BedsHelper } from 'src/beds/beds.helper';
 import { ProcessType } from 'src/process-templates/process-templates.entities';
-import { ProcessTemplatesService } from 'src/process-templates/process-templates.service';
 import { Sector } from 'src/sectors/sectors.entities';
-import { SectorsHelper } from 'src/sectors/sectors.helper';
 import { User } from 'src/users/users.entities';
-import { UsersHelper } from 'src/users/users.helper';
 import { Repository } from 'typeorm';
 import { ProcessInstance} from './process-instances.entities';
 import { SectorInstance } from './sector-instance.entities';
-import { ProcessTemplatesHelper } from 'src/process-templates/process-templates.helper';
-import { DepartmentsHelper } from 'src/department/department.helper';
-import { RoomsHelper } from 'src/rooms/rooms.helper';
 import { log } from 'console';
-import { RolesHelper } from 'src/roles/roles.helper';
+import { DepartmentService } from 'src/department/department.service';
+import { RoomsService } from 'src/rooms/rooms.service';
+import { BedsService } from 'src/beds/beds.service';
+import { UsersService } from 'src/users/users.service';
+import { SectorsService } from 'src/sectors/sectors.service';
+import { ProcessTemplatesService } from 'src/process-templates/process-templates.service';
 
 
 @Injectable()
@@ -26,7 +24,13 @@ export class ProcessInstancesService {
         private processInstanceRepo: Repository<ProcessInstance>,
 
         @Inject('SECTOR_INSTANCE_REPOSITORY')
-        private sectorInstanceRepo: Repository<SectorInstance>
+        private sectorInstanceRepo: Repository<SectorInstance>,
+        private departmentService: DepartmentService,
+        private roomsService: RoomsService,
+        private bedsService: BedsService,
+        private usersService: UsersService,
+        private sectorsService: SectorsService,
+        private processTemplatesService: ProcessTemplatesService
     ){}
 
     public async getAllProcessInstances(): Promise<ProcessInstance[]>{
@@ -63,7 +67,7 @@ export class ProcessInstancesService {
         let processInstance: ProcessInstance = this.processInstanceRepo.create();
         let sectorInstances: SectorInstance[] = [];
         let orderedSectorInstances: string[] = [];
-        const bed: Bed = await BedsHelper.getBedById(data.bedId);
+        const bed: Bed = await this.bedsService.getBedByID(data.bedId);
 
         for (let i = 0; i<data.orderedSectors.length; i++){
             const sectorInstanceData: NewSectorInstanceData = data.orderedSectors[i];
@@ -72,8 +76,8 @@ export class ProcessInstancesService {
             orderedSectorInstances.push(newSectorInstance.instanceId);
         }
 
-        const processType: ProcessType = await ProcessTemplatesHelper.getProcessTypeById(data.processType)
-        const creator: User = await UsersHelper.getUserById(data.creatorId);
+        const processType: ProcessType = await this.processTemplatesService.getProcessTypeByID(data.processType)
+        const creator: User = await this.usersService.getUserById(data.creatorId);
         processInstance.bed = bed;
         processInstance.instanceId = randomUUID();
         processInstance.sectorsOrder = orderedSectorInstances;
@@ -84,6 +88,12 @@ export class ProcessInstancesService {
         processInstance.processType = processType;
         processInstance.departmentId = data.departmentId;
         processInstance.roomId = data.roomId;
+
+        try {
+             await this.processInstanceRepo.save(processInstance);
+        } catch (error) {
+            const a= error;
+        }
         
         return await this.processInstanceRepo.save(processInstance);
 
@@ -93,11 +103,11 @@ export class ProcessInstancesService {
         let instance = await this.sectorInstanceRepo.findOne({where: {instanceId: sectorInstanceId}});
         if (data.status){instance.status = data.status}
         if (data.commitingWorkerId){
-            const worker = await UsersHelper.getUserById(data.commitingWorkerId);
+            const worker = await this.usersService.getUserById(data.commitingWorkerId);
             instance.commitingWorker = worker;
         }
         if (data.responsiblePersonId){
-            const responsible = await UsersHelper.getUserById(data.responsiblePersonId);
+            const responsible = await this.usersService.getUserById(data.responsiblePersonId);
             instance.responsiblePerson = responsible;
         }
         await this.sectorInstanceRepo.save(instance);
@@ -114,8 +124,8 @@ export class ProcessInstancesService {
         processStatusData.name = processInstance.name;
         processStatusData.description = processInstance.description;
         processStatusData.creator = processInstance.creator.fullname;
-        processStatusData.department = await DepartmentsHelper.getDepartmentById(processInstance.departmentId);
-        processStatusData.room = await RoomsHelper.getRoomById(processInstance.departmentId, processInstance.roomId);
+        processStatusData.department = await this.departmentService.getDepartmentByID(processInstance.departmentId);
+        processStatusData.room = await this.roomsService.getRoomByID(processInstance.departmentId, processInstance.roomId);
         processStatusData.processStatus = processInstance.status;
         processStatusData.processType = processInstance.processType.name;
         processStatusData.sectorInstances = processInstance.sectorInstances;
@@ -206,7 +216,7 @@ export class ProcessInstancesService {
     
     private async getCurrentSectorOfProcessInstanceOfUser(processInstance: ProcessInstance, userId: number): Promise<SectorInstance>{
         let currentSectorInstance: SectorInstance = null;
-        let user: User = await UsersHelper.getUserById(userId);
+        let user: User = await this.usersService.getUserById(userId);
         let isUserAManager: boolean = user.role.name == 'Admin';
         for(let instance of processInstance.sectorInstances){
             if (instance.status != Status.Done && (isUserAManager || instance.commitingWorker.id == userId || instance.responsiblePerson.id == userId)){
@@ -242,14 +252,14 @@ export class ProcessInstancesService {
     // }
 
     private async createSectorInstance(data: NewSectorInstanceData, bed: Bed): Promise<SectorInstance> {
-        const commitingWorker : User = await UsersHelper.getUserById(data.workerId);
-        const responsiblePerson: User = await UsersHelper.getUserById(data.responsibleUserId);
-        const sector: Sector = await SectorsHelper.getSectorById(data.sectorId);
+        const commitingWorker : User = await this.usersService.getUserById(data.workerId);
+        const responsiblePerson: User = await this.usersService.getUserById(data.responsibleUserId);
+        const sector: Sector = await this.sectorsService.getSector(data.id);
         
         let newSectorInstance: SectorInstance = await this.sectorInstanceRepo.create();
         newSectorInstance.instanceId = randomUUID();
-        newSectorInstance.sectorId = data.sectorId;
-        newSectorInstance.status = Status.Waiting;
+        newSectorInstance.sectorId = data.id;
+        newSectorInstance.status = Status[Status.Waiting];
         newSectorInstance.responsiblePerson = responsiblePerson;
         newSectorInstance.commitingWorker = commitingWorker;
         newSectorInstance.bed = bed;

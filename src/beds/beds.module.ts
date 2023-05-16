@@ -7,6 +7,7 @@ import { bedsProviders } from './beds.providers';
 @Module({
   imports: [DatabaseModule],
   providers: [...bedsProviders, BedsService],
-  controllers: [BedsController]
+  controllers: [BedsController],
+  exports: [BedsService]
 })
 export class BedsModule {}
