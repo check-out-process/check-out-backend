@@ -5,10 +5,12 @@ import { DatabaseModule } from 'src/database/database.module';
 import { usersProviders } from './users.provides';
 import { JobsModule } from 'src/jobs/jobs.module';
 import { RolesModule } from 'src/roles/roles.module';
+import { SectorsModule } from 'src/sectors/sectors.module';
 
 @Module({
-  imports: [DatabaseModule],
+  imports: [DatabaseModule, JobsModule, RolesModule, SectorsModule],
   providers: [...usersProviders, UsersService],
-  controllers: [UsersController]
+  controllers: [UsersController],
+  exports: [UsersService]
 })
 export class UsersModule {}

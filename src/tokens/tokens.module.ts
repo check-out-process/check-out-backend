@@ -3,12 +3,12 @@ import { DatabaseModule } from 'src/database/database.module';;
 import { TokensController } from './tokens.controller';
 import { TokensService } from './tokens.service';
 import { tokensProviders } from './tokens.provider';
-import { UsersService } from 'src/users/users.service';
-import { usersProviders } from 'src/users/users.provides';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
-  imports: [DatabaseModule],
-  providers: [...tokensProviders, TokensService, UsersService, ...usersProviders ],
-  controllers: [TokensController]
+  imports: [DatabaseModule, UsersModule],
+  providers: [...tokensProviders, TokensService ],
+  controllers: [TokensController],
+  exports: [TokensService]
 })
 export class TokenModule {}
