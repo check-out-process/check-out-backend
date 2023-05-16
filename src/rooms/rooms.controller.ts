@@ -14,7 +14,7 @@ export class RoomsController {
 
     @Get(':roomID')
     async getRoom(@Param() params): Promise<Room> {
-        return await this.roomsService.getRoomByID(params.roomID, params.departmentId);
+        return await this.roomsService.getRoomByID(params.roomID);
     }
 
     @Post()

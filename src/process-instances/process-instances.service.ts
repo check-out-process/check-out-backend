@@ -6,7 +6,7 @@ import { ProcessType } from 'src/process-templates/process-templates.entities';
 import { Sector } from 'src/sectors/sectors.entities';
 import { User } from 'src/users/users.entities';
 import { Repository } from 'typeorm';
-import { ProcessInstance} from './process-instances.entities';
+import { ProcessInstance } from './process-instances.entities';
 import { SectorInstance } from './sector-instance.entities';
 import { log } from 'console';
 import { DepartmentService } from 'src/department/department.service';
@@ -31,9 +31,9 @@ export class ProcessInstancesService {
         private usersService: UsersService,
         private sectorsService: SectorsService,
         private processTemplatesService: ProcessTemplatesService
-    ){}
+    ) { }
 
-    public async getAllProcessInstances(): Promise<ProcessInstance[]>{
+    public async getAllProcessInstances(): Promise<ProcessInstance[]> {
         let instances: ProcessInstance[] = await this.processInstanceRepo.find();
         instances = instances.map(instance => {
             instance.sectorInstances = this.orderSectors(instance.sectorInstances, instance.sectorsOrder);
@@ -48,28 +48,28 @@ export class ProcessInstancesService {
 
     public async getProcessInstance(id: string): Promise<ProcessInstance> {
         //ToDo: handle exception
-        let instance = await this.processInstanceRepo.findOne({where: {instanceId: id}});
+        let instance = await this.processInstanceRepo.findOne({ where: { instanceId: id } });
         instance.sectorInstances = this.orderSectors(instance.sectorInstances, instance.sectorsOrder);
         return instance;
     }
 
     public async getSectorInstance(id: string): Promise<SectorInstance> {
-        return await this.sectorInstanceRepo.findOne({where: {instanceId: id}});
+        return await this.sectorInstanceRepo.findOne({ where: { instanceId: id } });
     }
 
     public async getSectorInstancesOfProcess(processId: string): Promise<SectorInstance[]> {
-        const procInstance = await this.processInstanceRepo.findOne({where: {instanceId: processId}});
+        const procInstance = await this.processInstanceRepo.findOne({ where: { instanceId: processId } });
         const sectorInstances = procInstance.sectorInstances;
         return sectorInstances;
     }
 
-    public async createProcessInstanceFromData(data: CreateProcessInstanceFromDataParams): Promise<ProcessInstance>{
+    public async createProcessInstanceFromData(data: CreateProcessInstanceFromDataParams): Promise<ProcessInstance> {
         let processInstance: ProcessInstance = this.processInstanceRepo.create();
         let sectorInstances: SectorInstance[] = [];
         let orderedSectorInstances: string[] = [];
         const bed: Bed = await this.bedsService.getBedByID(data.bedId);
 
-        for (let i = 0; i<data.orderedSectors.length; i++){
+        for (let i = 0; i < data.orderedSectors.length; i++) {
             const sectorInstanceData: NewSectorInstanceData = data.orderedSectors[i];
             const newSectorInstance = await this.createSectorInstance(sectorInstanceData, bed);
             sectorInstances.push(newSectorInstance);
@@ -90,28 +90,28 @@ export class ProcessInstancesService {
         processInstance.roomId = data.roomId;
 
         try {
-             await this.processInstanceRepo.save(processInstance);
+            await this.processInstanceRepo.save(processInstance);
         } catch (error) {
-            const a= error;
+            const a = error;
         }
-        
+
         return await this.processInstanceRepo.save(processInstance);
 
     }
 
-    public async updateSectorInstance(data: UpdateSectorInstanceParams, processInstanceId: string, sectorInstanceId: string): Promise<ProcessInstance>{
-        let instance = await this.sectorInstanceRepo.findOne({where: {instanceId: sectorInstanceId}});
-        if (data.status){instance.status = data.status}
-        if (data.commitingWorkerId){
+    public async updateSectorInstance(data: UpdateSectorInstanceParams, processInstanceId: string, sectorInstanceId: string): Promise<ProcessInstance> {
+        let instance = await this.sectorInstanceRepo.findOne({ where: { instanceId: sectorInstanceId } });
+        if (data.status) { instance.status = data.status }
+        if (data.commitingWorkerId) {
             const worker = await this.usersService.getUserById(data.commitingWorkerId);
             instance.commitingWorker = worker;
         }
-        if (data.responsiblePersonId){
+        if (data.responsiblePersonId) {
             const responsible = await this.usersService.getUserById(data.responsiblePersonId);
             instance.responsiblePerson = responsible;
         }
         await this.sectorInstanceRepo.save(instance);
-        return await this.processInstanceRepo.findOne({where: {instanceId: processInstanceId}});
+        return await this.processInstanceRepo.findOne({ where: { instanceId: processInstanceId } });
     }
 
 
@@ -125,18 +125,18 @@ export class ProcessInstancesService {
         processStatusData.description = processInstance.description;
         processStatusData.creator = processInstance.creator.fullname;
         processStatusData.department = await this.departmentService.getDepartmentByID(processInstance.departmentId);
-        processStatusData.room = await this.roomsService.getRoomByID(processInstance.departmentId, processInstance.roomId);
+        processStatusData.room = await this.roomsService.getRoomByID(processInstance.roomId);
         processStatusData.processStatus = processInstance.status;
         processStatusData.processType = processInstance.processType.name;
         processStatusData.sectorInstances = processInstance.sectorInstances;
-        processStatusData.currentSectorInstance = this.getCurrentSectorOfProcessInstanceOfUser(processInstance, data.userId);
-        return processStatusData;   
+        processStatusData.currentSectorInstance = await this.getCurrentSectorOfProcessInstanceOfUser(processInstance, data.userId);
+        return processStatusData;
     }
 
     public async updateProcessStatus(bedId: string, data: UpdateSectorStatusParams): Promise<ProcessInstance> {
         const processInstance: ProcessInstance = await this.getProcessInstance(data.processInstanceId);
 
-        if (processInstance.bed.id != bedId){
+        if (processInstance.bed.id != bedId) {
             //ToDo: throw exception
             log("process instance not match to bed error")
             return;
@@ -147,13 +147,13 @@ export class ProcessInstancesService {
 
         log(currentSectorInstance.name)
         // change it if there`s a feature of parallel sectors in process
-        if (currentSectorInstance.instanceId != data.sectorInstanceId ){
+        if (currentSectorInstance.instanceId != data.sectorInstanceId) {
             //ToDo: throw exception
             log("sector instance not match error")
             return;
         }
 
-        if (currentSectorInstance.commitingWorker.id != data.userId && data.userId != currentSectorInstance.responsiblePerson.id){
+        if (currentSectorInstance.commitingWorker.id != data.userId && data.userId != currentSectorInstance.responsiblePerson.id) {
             //ToDo: throw restricted exception
             log("restricted")
             return;
@@ -168,69 +168,64 @@ export class ProcessInstancesService {
     }
 
     private async getProcessInstanceOfBed(bedId: string): Promise<ProcessInstance> {
-        const processInstance = await this.processInstanceRepo.createQueryBuilder("processInstance")
-        .leftJoinAndSelect("processInstance.bed", "bed")
-        .leftJoinAndSelect("processInstance.sectorInstances", "sectorInstances")
-        .leftJoinAndSelect("processInstance.processType", "processType")
-        .leftJoinAndSelect("processInstance.creator", "creator")
-        .where("bed.id = :bedId", {bedId})
-        .getOne()
-        //.select("processInstance.instanceId")
-        //.getRawOne();
+        return await this.processInstanceRepo.findOne({
+            relations: { bed: true, sectorInstances: true, processType: true, creator: true },
+            where: {
+                bed: { id: bedId },
+            },
+        })
 
-        return processInstance;
-        //return await this.processInstanceRepo.findOne({where: {instanceId: processInstance.processInstance_instanceId}});
     }
 
-    private updateSectorInstanceStatus(sectorInstance: SectorInstance, status: Status): void{
-        log(typeof(sectorInstance.status))
-        log(typeof(status))
-        if (sectorInstance.status > status){
+    private updateSectorInstanceStatus(sectorInstance: SectorInstance, status: Status): void {
+        log(typeof (sectorInstance.status))
+        log(typeof (status))
+        if (sectorInstance.status > status) {
             //ToDo: throw exception
             log("status error")
             return
         }
 
-        if (sectorInstance.status == status){
+        if (sectorInstance.status == status) {
             log("status equal error")
             return;
         }
 
         sectorInstance.status = status;
         log()
-        if (status == Status.Done){
+        if (status == Status.Done) {
             sectorInstance.endedAt = new Date()
         }
     }
 
-    private getCurrentSectorOfProcessInstace(processInstance: ProcessInstance): SectorInstance{
+    private getCurrentSectorOfProcessInstace(processInstance: ProcessInstance): SectorInstance {
         let currentSectorInstance: SectorInstance = null;
-        for(let instance of processInstance.sectorInstances){
-            if (instance.status != Status.Done){
+        for (let instance of processInstance.sectorInstances) {
+            if (instance.status != Status.Done) {
                 currentSectorInstance = instance;
                 break;
             }
         }
         return currentSectorInstance;
     }
-    
-    private async getCurrentSectorOfProcessInstanceOfUser(processInstance: ProcessInstance, userId: number): Promise<SectorInstance>{
+
+    private async getCurrentSectorOfProcessInstanceOfUser(processInstance: ProcessInstance, userId: number): Promise<SectorInstance> {
         let currentSectorInstance: SectorInstance = null;
         let user: User = await this.usersService.getUserById(userId);
         let isUserAManager: boolean = user.role.name == 'Admin';
-        for(let instance of processInstance.sectorInstances){
-            if (instance.status != Status.Done && (isUserAManager || instance.commitingWorker.id == userId || instance.responsiblePerson.id == userId)){
+        for (let instance of processInstance.sectorInstances) {
+            if (instance.status != Status.Done && (isUserAManager || instance.commitingWorker.id == userId || instance.responsiblePerson.id == userId)) {
                 currentSectorInstance = instance;
                 break;
             }
         }
         return currentSectorInstance;
     }
-    
-    private validateProcessStatus(processInstance: ProcessInstance): boolean{
+
+    private validateProcessStatus(processInstance: ProcessInstance): boolean {
 
         let isDone: boolean = processInstance.sectorInstances.every(instance => instance.status == Status.Done)
-        if(isDone){
+        if (isDone) {
             //ToDo: fix bug of server / pc timestamp diff
             processInstance.endedAt = new Date();
             processInstance.status = Status.Done;
@@ -252,10 +247,10 @@ export class ProcessInstancesService {
     // }
 
     private async createSectorInstance(data: NewSectorInstanceData, bed: Bed): Promise<SectorInstance> {
-        const commitingWorker : User = await this.usersService.getUserById(data.workerId);
+        const commitingWorker: User = await this.usersService.getUserById(data.workerId);
         const responsiblePerson: User = await this.usersService.getUserById(data.responsibleUserId);
         const sector: Sector = await this.sectorsService.getSector(data.id);
-        
+
         let newSectorInstance: SectorInstance = await this.sectorInstanceRepo.create();
         newSectorInstance.instanceId = randomUUID();
         newSectorInstance.sectorId = data.id;
@@ -269,18 +264,17 @@ export class ProcessInstancesService {
     }
 
     private orderSectors(sectors: SectorInstance[], order: string[]) {
-        if (sectors.length != order.length){
+        if (sectors.length != order.length) {
             // throw err
         }
         let instancesOrder: string[] = sectors.map(instance => instance.instanceId);
-        if (JSON.stringify(instancesOrder) === JSON.stringify(order))
-        {
+        if (JSON.stringify(instancesOrder) === JSON.stringify(order)) {
             return sectors;
         }
         let orderedArray: SectorInstance[] = [];
         order.forEach(instanceId => {
             const sector: SectorInstance = sectors.find(sec => sec.instanceId == instanceId)
-            if (sector) {orderedArray.push(sector)}
+            if (sector) { orderedArray.push(sector) }
             else {
                 // think aboud the exception. maybe internal server error?
             }
