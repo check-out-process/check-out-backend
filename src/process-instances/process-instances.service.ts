@@ -214,7 +214,7 @@ export class ProcessInstancesService {
         let user: User = await this.usersService.getUserById(userId);
         let isUserAManager: boolean = user.role.name == 'Admin';
         for (let instance of processInstance.sectorInstances) {
-            if (instance.status != Status.Done && (isUserAManager || instance.commitingWorker.id == userId || instance.responsiblePerson.id == userId)) {
+            if (instance.status != Status.Done && (isUserAManager || instance.commitingWorker.id == userId || instance.responsiblePerson.id == userId || processInstance.creator.id == userId)) {
                 currentSectorInstance = instance;
                 break;
             }
