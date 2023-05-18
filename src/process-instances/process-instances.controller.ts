@@ -3,10 +3,11 @@ import { Body, Controller, Headers, Get, Param, Patch, Post } from '@nestjs/comm
 import { ProcessInstance } from './process-instances.entities';
 import { ProcessInstancesService } from './process-instances.service';
 import { verify } from 'jsonwebtoken';
+import { getUserDecoded } from '../auth/auth.helper';
 
 @Controller('process-instances')
 export class ProcessInstancesController {
-    constructor(private processInstancesService: ProcessInstancesService){}
+    constructor(private processInstancesService: ProcessInstancesService) { }
 
     @Get()
     public async getAllProcessInstances(): Promise<ProcessInstance[]> {
@@ -29,13 +30,14 @@ export class ProcessInstancesController {
     }
 
     @Get(':bedId/update-status')
-    public async getProcessStatus(@Param() params, @Headers() headers): Promise<ProcessInstanceStatusReturnedParams>{
-        const decoded = verify(headers["x-access-token"], process.env.ACCESS_TOKEN_SECRET);
-        return await this.processInstancesService.getProcessStatus(params.bedId, decoded.id);
+    public async getProcessStatus(@Param() params, @Headers() headers): Promise<ProcessInstanceStatusReturnedParams> {
+        const userDecoded = getUserDecoded(headers["x-access-token"]);
+        return await this.processInstancesService.getProcessStatus(params.bedId, userDecoded.id);
     }
 
     @Patch(':bedId/update-status')
-    public async updateProcessStatus(@Param() params, @Body() data: UpdateSectorStatusParams): Promise<void> {
-        await this.processInstancesService.updateProcessStatus(params.bedId, data);
+    public async updateProcessStatus(@Param() params, @Headers() headers, @Body() data: UpdateSectorStatusParams): Promise<void> {
+        const userDecoded = getUserDecoded(headers["x-access-token"]);
+        await this.processInstancesService.updateProcessStatus(params.bedId, data, userDecoded.id);
     }
 }
