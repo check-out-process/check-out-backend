@@ -28,17 +28,6 @@ export class ProcessInstance{
 
     @OneToMany(() => SectorInstance, (sectorInstance)=> sectorInstance.process, {eager: true, cascade: true})
     @JoinTable()
-    // @JoinTable({
-    //     name: "sector_instance_in_process_instance",
-    //     joinColumns: [
-    //         {name: "processInstanceId", referencedColumnName: "instanceId"},
-    //         {name: "processInstanceName", referencedColumnName: "name"}
-    //     ],
-    //     inverseJoinColumns: [
-    //         {name: "sectorId", referencedColumnName: "instanceId"},
-    //         {name: "sectorName", referencedColumnName: "name"}
-    //     ]
-    // })
     sectorInstances: SectorInstance[];
 
     @Column({
@@ -53,7 +42,7 @@ export class ProcessInstance{
     @JoinColumn({name: "creatorId", referencedColumnName: "id"})
     creator: User;
 
-    @OneToOne(()=> Bed, {eager:true})
+    @ManyToOne(()=> Bed, {eager:true})
     @JoinColumn([
         {name: "bedId", referencedColumnName: "id"}
     ])
