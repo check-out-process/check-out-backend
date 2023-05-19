@@ -5,7 +5,7 @@ import { Bed } from 'src/beds/beds.entities';
 import { ProcessType } from 'src/process-templates/process-templates.entities';
 import { Sector } from 'src/sectors/sectors.entities';
 import { User } from 'src/users/users.entities';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { ProcessInstance } from './process-instances.entities';
 import { SectorInstance } from './sector-instance.entities';
 import { log } from 'console';
@@ -65,6 +65,12 @@ export class ProcessInstancesService {
     }
 
     public async createProcessInstanceFromData(data: CreateProcessInstanceFromDataParams): Promise<ProcessInstance> {
+        const processInstanceOfBed: ProcessInstance = await this.getProcessInstanceOfBedInProcess(data.bedId)
+        
+        if(!_.isEmpty(processInstanceOfBed)){
+            throw new HttpException("there is already active process instance of bed", HttpStatus.CONFLICT);
+        }
+
         let processInstance: ProcessInstance = this.processInstanceRepo.create();
         let sectorInstances: SectorInstance[] = [];
         let orderedSectorInstances: string[] = [];
@@ -169,6 +175,16 @@ export class ProcessInstancesService {
             },
         })
 
+    }
+
+    private async getProcessInstanceOfBedInProcess(bedId: string): Promise<ProcessInstance> {
+        return await this.processInstanceRepo.findOne({
+            relations: { bed: true, sectorInstances: true, processType: true, creator: true },
+            where: {
+                bed: { id: bedId },
+                status: Not(Status.Done)
+            },
+        })
     }
 
     private updateSectorInstanceStatus(sectorInstance: SectorInstance, status: Status): void {
