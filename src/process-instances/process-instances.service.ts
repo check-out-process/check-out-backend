@@ -1,5 +1,5 @@
-import { CreateProcessInstanceFromDataParams, GetProcessInstanceStatusParams, NewSectorInstanceData, ProcessInstanceStatusReturnedParams, Status, UpdateSectorInstanceParams, UpdateSectorStatusParams } from '@checkout/types';
-import { Inject, Injectable } from '@nestjs/common';
+import { CreateProcessInstanceFromDataParams, NewSectorInstanceData, ProcessInstanceStatusReturnedParams, Status, UpdateSectorInstanceParams, UpdateSectorStatusParams } from '@checkout/types';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { Bed } from 'src/beds/beds.entities';
 import { ProcessType } from 'src/process-templates/process-templates.entities';
@@ -15,6 +15,7 @@ import { BedsService } from 'src/beds/beds.service';
 import { UsersService } from 'src/users/users.service';
 import { SectorsService } from 'src/sectors/sectors.service';
 import { ProcessTemplatesService } from 'src/process-templates/process-templates.service';
+import * as _ from 'lodash';
 
 
 @Injectable()
@@ -129,38 +130,31 @@ export class ProcessInstancesService {
         processStatusData.processStatus = processInstance.status;
         processStatusData.processType = processInstance.processType.name;
         processStatusData.sectorInstances = processInstance.sectorInstances;
-        processStatusData.currentSectorInstance = await this.getCurrentSectorOfProcessInstanceOfUser(processInstance, userId);
+        const { currentSectorInstance, userSectorInstances } = await this.getSectorsOfProcessInstanceOfUser(processInstance, userId);
+        processStatusData.currentSectorInstance = currentSectorInstance;
+        processStatusData.sectorInstances = userSectorInstances;
+
         return processStatusData;
     }
 
-    public async updateProcessStatus(bedId: string, data: UpdateSectorStatusParams): Promise<ProcessInstance> {
+    public async updateProcessStatus(bedId: string, data: UpdateSectorStatusParams, userId: number): Promise<ProcessInstance> {
         const processInstance: ProcessInstance = await this.getProcessInstance(data.processInstanceId);
 
         if (processInstance.bed.id != bedId) {
-            //ToDo: throw exception
-            log("process instance not match to bed error")
-            return;
-        }
-        let currentSectorInstance = this.getCurrentSectorOfProcessInstace(processInstance);
-
-        log("current sector instance")
-
-        log(currentSectorInstance.name)
-        // change it if there`s a feature of parallel sectors in process
-        if (currentSectorInstance.instanceId != data.sectorInstanceId) {
-            //ToDo: throw exception
-            log("sector instance not match error")
-            return;
+            throw new HttpException("process instance not match to bed", HttpStatus.NOT_FOUND);
         }
 
-        if (currentSectorInstance.commitingWorker.id != data.userId && data.userId != currentSectorInstance.responsiblePerson.id) {
-            //ToDo: throw restricted exception
-            log("restricted")
-            return;
+        let currentUserSectorInstance = this.getSectorBysectorInstanceId(processInstance, data.sectorInstanceId);
+
+        if (!currentUserSectorInstance || currentUserSectorInstance.instanceId != data.sectorInstanceId) {
+            throw new HttpException("sector instance not match processInstance", HttpStatus.NOT_FOUND);
         }
 
-        this.updateSectorInstanceStatus(currentSectorInstance, data.status);
-        log(this.getCurrentSectorOfProcessInstace(processInstance).name)
+        if (currentUserSectorInstance.commitingWorker.id != userId && userId != currentUserSectorInstance.responsiblePerson.id && userId != processInstance.creator.id) {
+            throw new HttpException("user not have permmision to edit sector", HttpStatus.FORBIDDEN);
+        }
+
+        this.updateSectorInstanceStatus(currentUserSectorInstance, data.status);
         this.validateProcessStatus(processInstance);
 
         return await this.processInstanceRepo.save(processInstance)
@@ -178,17 +172,12 @@ export class ProcessInstancesService {
     }
 
     private updateSectorInstanceStatus(sectorInstance: SectorInstance, status: Status): void {
-        log(typeof (sectorInstance.status))
-        log(typeof (status))
         if (sectorInstance.status > status) {
-            //ToDo: throw exception
-            log("status error")
-            return
+            //ToDo: change because its enum string
         }
 
         if (sectorInstance.status == status) {
-            log("status equal error")
-            return;
+            throw new HttpException("status  already equals", HttpStatus.CONFLICT);
         }
 
         sectorInstance.status = status;
@@ -198,28 +187,26 @@ export class ProcessInstancesService {
         }
     }
 
-    private getCurrentSectorOfProcessInstace(processInstance: ProcessInstance): SectorInstance {
-        let currentSectorInstance: SectorInstance = null;
-        for (let instance of processInstance.sectorInstances) {
-            if (instance.status != Status.Done) {
-                currentSectorInstance = instance;
-                break;
-            }
-        }
-        return currentSectorInstance;
+    private getSectorBysectorInstanceId(processInstance: ProcessInstance, sectorInstanceId: string): SectorInstance {
+        return processInstance.sectorInstances.find(sectorInstance => sectorInstance.instanceId === sectorInstanceId);
     }
 
-    private async getCurrentSectorOfProcessInstanceOfUser(processInstance: ProcessInstance, userId: number): Promise<SectorInstance> {
+    private async getSectorsOfProcessInstanceOfUser(processInstance: ProcessInstance, userId: number) {
         let currentSectorInstance: SectorInstance = null;
+        let userSectorInstances: SectorInstance[] = [];
+
         let user: User = await this.usersService.getUserById(userId);
         let isUserAManager: boolean = user.role.name == 'Admin';
         for (let instance of processInstance.sectorInstances) {
             if (instance.status != Status.Done && (isUserAManager || instance.commitingWorker.id == userId || instance.responsiblePerson.id == userId || processInstance.creator.id == userId)) {
-                currentSectorInstance = instance;
-                break;
+                if (_.isEmpty(currentSectorInstance)) {
+                    currentSectorInstance = instance;
+                } else {
+                    userSectorInstances.push(instance);
+                }
             }
         }
-        return currentSectorInstance;
+        return { currentSectorInstance, userSectorInstances }
     }
 
     private validateProcessStatus(processInstance: ProcessInstance): boolean {
