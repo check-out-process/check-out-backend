@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
-import { UserCreationParams, UserPatchAddSectorParams, UserPatchParams } from '@checkout/types';
+import { UserPatchAddSectorParams, UserPatchParams } from '@checkout/types';
 import { User } from './users.entities';
 import { UsersService } from './users.service';
 
@@ -18,12 +18,6 @@ export class UsersController {
         await user.sectors;
         return user;
     }
-
-    @Post()
-    public async addUser(@Body() data: UserCreationParams): Promise<User>{
-        return await this.usersService.addUser(data);
-    }
-
     @Patch(':userID')
     public async updateUser(
         @Param() params,
