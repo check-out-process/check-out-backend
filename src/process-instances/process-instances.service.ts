@@ -95,6 +95,7 @@ export class ProcessInstancesService {
         processInstance.processType = processType;
         processInstance.departmentId = data.departmentId;
         processInstance.roomId = data.roomId;
+        processInstance.isIsolation = data.isIsolation;
 
         try {
             await this.processInstanceRepo.save(processInstance);

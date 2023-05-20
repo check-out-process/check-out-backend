@@ -6,6 +6,7 @@ import { SectorsHelper } from 'src/sectors/sectors.helper';
 import { Repository } from 'typeorm';
 import { AddProcessTemplateParams, AddProcessTypeParams, PatchProcessTemplateParams } from '@checkout/types';
 import { ProcessTemplate, ProcessType } from './process-templates.entities';
+import * as _ from 'lodash';
 
 @Injectable()
 export class ProcessTemplatesService {
@@ -69,14 +70,14 @@ export class ProcessTemplatesService {
             }
         });
         if (data.relatedSectors_ids){
-            const idArray: string[] = data.relatedSectors_ids;
+            const idArray: string[] = _.uniq(data.relatedSectors_ids);
             let newSectorArray: Sector[] = [];
             newSectorArray = await Promise.all(idArray.map(async (id: string) => {
                 return await SectorsHelper.getSectorById(id);
             }))
             
             proc.relatedSectors = newSectorArray;
-            proc.relatedSectorsOrder = idArray;
+            proc.relatedSectorsOrder = data.relatedSectors_ids;
         }
 
         if (data.processType){

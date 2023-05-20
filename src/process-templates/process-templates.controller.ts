@@ -22,8 +22,6 @@ export class ProcessTemplatesController {
         return await this.processService.getProcessTemplateById(params.processId);
     }
 
-    
-
     @Get('types/:typeId')
     public async getProcessType(@Param() params): Promise<ProcessType>{
         return await this.processService.getProcessTypeByID(params.typeId);
