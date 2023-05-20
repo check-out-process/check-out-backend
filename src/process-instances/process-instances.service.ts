@@ -131,7 +131,12 @@ export class ProcessInstancesService {
 
     public async updateSectorInstance(data: UpdateSectorInstanceParams, processInstanceId: string, sectorInstanceId: string): Promise<ProcessInstance> {
         let instance = await this.sectorInstanceRepo.findOne({ where: { instanceId: sectorInstanceId } });
-        if (data.status) { instance.status = data.status }
+        if (data.status) { 
+            instance.status = data.status;
+            if (data.status == Status.Done) {
+                instance.endedAt = new Date();
+            }
+        }
         if (data.commitingWorkerId) {
             const worker = await this.usersService.getUserById(data.commitingWorkerId);
             instance.commitingWorker = worker;
@@ -220,7 +225,6 @@ export class ProcessInstancesService {
         }
 
         sectorInstance.status = status;
-        log()
         if (status == Status.Done) {
             sectorInstance.endedAt = new Date()
         }
@@ -261,7 +265,7 @@ export class ProcessInstancesService {
                     userSectorInstances.push(sectorInstance)
                 }
             });
-            
+
             return userSectorInstances;
         }
     }
