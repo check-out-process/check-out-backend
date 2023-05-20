@@ -60,10 +60,16 @@ export class ProcessInstancesService {
 
     public async getUserProcessInstance(processId: string, userId: number): Promise<ProcessInstance> {
         let instance = await this.processInstanceRepo.findOne({ where: { instanceId: processId } });
+        let userSectorsInstance;
 
-        const userSectorsInstance = await this.getUserSectorsInstance(instance.sectorInstances, userId);
+        if (instance.creator.id === userId) {
+            userSectorsInstance = instance.sectorInstances;
+        } else {
+            userSectorsInstance = await this.getUserSectorsInstance(instance.sectorInstances, userId);
+        }
+
         instance.sectorInstances = this.orderSectors(userSectorsInstance, instance.sectorsOrder);
-        
+
         return instance;
     }
 
@@ -131,7 +137,7 @@ export class ProcessInstancesService {
 
     public async updateSectorInstance(data: UpdateSectorInstanceParams, processInstanceId: string, sectorInstanceId: string): Promise<ProcessInstance> {
         let instance = await this.sectorInstanceRepo.findOne({ where: { instanceId: sectorInstanceId } });
-        if (data.status) { 
+        if (data.status) {
             instance.status = data.status;
             if (data.status == Status.Done) {
                 instance.endedAt = new Date();
@@ -256,7 +262,7 @@ export class ProcessInstancesService {
         let userSectorInstances: SectorInstance[] = [];
         let user: User = await this.usersService.getUserById(userId);
         let isUserAManager: boolean = user.role.name == 'Admin';
-        
+
         if (isUserAManager) {
             return sectorInstances;
         } else {

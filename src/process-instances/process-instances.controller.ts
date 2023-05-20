@@ -2,7 +2,6 @@ import { CreateProcessInstanceFromDataParams, GetProcessInstanceStatusParams, Pr
 import { Body, Controller, Headers, Get, Param, Patch, Post } from '@nestjs/common';
 import { ProcessInstance } from './process-instances.entities';
 import { ProcessInstancesService } from './process-instances.service';
-import { verify } from 'jsonwebtoken';
 import { getUserDecoded } from '../auth/auth.helper';
 
 @Controller('process-instances')
