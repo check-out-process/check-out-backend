@@ -59,4 +59,7 @@ export class ProcessInstance{
         nullable: true,
       })
     endedAt: Date;
+
+    @Column()
+    isIsolation: boolean;
 }
