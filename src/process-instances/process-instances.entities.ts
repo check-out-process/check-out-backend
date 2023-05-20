@@ -4,6 +4,8 @@ import { User } from "src/users/users.entities";
 import { Column, CreateDateColumn, Entity, Index, JoinColumn, JoinTable, ManyToOne, OneToMany, OneToOne, PrimaryColumn, UpdateDateColumn } from "typeorm";
 import { SectorInstance } from "./sector-instance.entities";
 import { Status } from "@checkout/types";
+import { Room } from "src/rooms/rooms.entities";
+import { Department } from "src/department/department.entities";
 
 @Entity()
 export class ProcessInstance{
@@ -16,11 +18,17 @@ export class ProcessInstance{
     @Column()
     description: string;
 
-    @Column()
-    departmentId: string;
+    @ManyToOne(()=> Department, {eager:true})
+    @JoinColumn([
+        {name: "departmentId", referencedColumnName: "id"}
+    ])
+    department: Department;
 
-    @Column()
-    roomId: string;
+    @ManyToOne(()=> Room, {eager:true})
+    @JoinColumn([
+        {name: "roomId", referencedColumnName: "id"}
+    ])
+    room: Room;
 
     @ManyToOne(() => ProcessType, {eager: true})
     @JoinColumn()

@@ -10,13 +10,15 @@ export class ProcessInstancesController {
     constructor(private processInstancesService: ProcessInstancesService) { }
 
     @Get()
-    public async getAllProcessInstances(): Promise<ProcessInstance[]> {
-        return await this.processInstancesService.getAllProcessInstances();
+    public async getUserProcessInstances(@Headers() headers): Promise<ProcessInstance[]> {
+        const userDecoded = getUserDecoded(headers["x-access-token"]);
+        return await this.processInstancesService.getUserProcessInstances(userDecoded.id);
     }
 
     @Get(':processId')
-    public async getProcessInstance(@Param() params): Promise<ProcessInstance> {
-        return await this.processInstancesService.getProcessInstance(params.processId);
+    public async getUserProcessInstance(@Param() params, @Headers() headers): Promise<ProcessInstance> {
+        const userDecoded = getUserDecoded(headers["x-access-token"]);
+        return await this.processInstancesService.getUserProcessInstance(params.processId, userDecoded.id);
     }
 
     @Post()
