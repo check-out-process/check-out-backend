@@ -1,13 +1,13 @@
 import { Status } from "@checkout/types";
 import { Bed } from "src/beds/beds.entities";
 import { User } from "src/users/users.entities";
-import { Column, CreateDateColumn, Entity, Index, ManyToOne, OneToOne, PrimaryColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryColumn, UpdateDateColumn } from "typeorm";
 import { ProcessInstance } from "./process-instances.entities";
 
 
 @Entity()
 export class SectorInstance {
-    @PrimaryColumn({unique: true})
+    @PrimaryColumn({ unique: true })
     instanceId: string;
 
     @Column()
@@ -24,25 +24,25 @@ export class SectorInstance {
     })
     status: Status;
 
-    @ManyToOne(() => User, {eager: true})
+    @ManyToOne(() => User, { eager: true })
     commitingWorker: User;
 
-    @ManyToOne(() => User, {eager: true})
-    responsiblePerson: User; 
+    @ManyToOne(() => User, { eager: true, nullable: true })
+    responsiblePerson?: User;
 
-    @ManyToOne(() => Bed, {eager: true})
+    @ManyToOne(() => Bed, { eager: true })
     bed: Bed;
 
-    @CreateDateColumn({type: 'datetime'})
+    @CreateDateColumn({ type: 'datetime' })
     createdAt: Date;
 
-    @UpdateDateColumn({type: 'datetime'})
+    @UpdateDateColumn({ type: 'datetime' })
     updatedAt: Date;
 
     @Column({
         type: 'datetime',
         nullable: true,
-        })
+    })
     endedAt: Date;
 
 

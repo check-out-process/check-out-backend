@@ -37,14 +37,20 @@ export class ProcessInstancesService {
     ) { }
 
     public async getUserProcessInstances(userId: number): Promise<ProcessInstance[]> {
-        let instances: ProcessInstance[] = await this.processInstanceRepo.find({
-            where: [
-                { creator: { id: userId } },
-                { sectorInstances: { commitingWorker: { id: userId } } },
-                { sectorInstances: { responsiblePerson: { id: userId } } }
-            ]
-        }
-        );
+        const instances = await this.processInstanceRepo
+            .createQueryBuilder('processInstance')
+            .leftJoinAndSelect("processInstance.bed", "bed")
+            .leftJoinAndSelect("processInstance.department", "department")
+            .leftJoinAndSelect("processInstance.room", "room")
+            .leftJoinAndSelect("processInstance.sectorInstances", "sectorInstance")
+            .leftJoinAndSelect("sectorInstance.commitingWorker", "commitingWorker")
+            .leftJoinAndSelect("sectorInstance.responsiblePerson", "responsiblePerson")
+            .leftJoinAndSelect("processInstance.processType", "processType")
+            .leftJoinAndSelect("processInstance.creator", "creator")
+            .where("creator.id = :userId", { userId })
+            .orWhere("commitingWorker.id = :userId", { userId })
+            .orWhere("responsiblePerson.id = :userId", { userId })
+            .getMany();
 
         instances.forEach(instance => {
             delete instance.sectorInstances;
@@ -60,10 +66,16 @@ export class ProcessInstancesService {
 
     public async getUserProcessInstance(processId: string, userId: number): Promise<ProcessInstance> {
         let instance = await this.processInstanceRepo.findOne({ where: { instanceId: processId } });
+        let userSectorsInstance;
 
-        const userSectorsInstance = await this.getUserSectorsInstance(instance.sectorInstances, userId);
+        if (instance.creator.id === userId) {
+            userSectorsInstance = instance.sectorInstances;
+        } else {
+            userSectorsInstance = await this.getUserSectorsInstance(instance.sectorInstances, userId);
+        }
+
         instance.sectorInstances = this.orderSectors(userSectorsInstance, instance.sectorsOrder);
-        
+
         return instance;
     }
 
@@ -105,7 +117,7 @@ export class ProcessInstancesService {
             orderedSectorInstances.push(newSectorInstance.instanceId);
         }
 
-        const processType: ProcessType = await this.processTemplatesService.getProcessTypeByID(data.processType)
+        const processType: ProcessType = await this.processTemplatesService.getProcessTypeByUUID(data.processTypeId)
         const creator: User = await this.usersService.getUserById(data.creatorId);
         processInstance.bed = bed;
         processInstance.instanceId = randomUUID();
@@ -131,7 +143,7 @@ export class ProcessInstancesService {
 
     public async updateSectorInstance(data: UpdateSectorInstanceParams, processInstanceId: string, sectorInstanceId: string): Promise<ProcessInstance> {
         let instance = await this.sectorInstanceRepo.findOne({ where: { instanceId: sectorInstanceId } });
-        if (data.status) { 
+        if (data.status) {
             instance.status = data.status;
             if (data.status == Status.Done) {
                 instance.endedAt = new Date();
@@ -146,7 +158,11 @@ export class ProcessInstancesService {
             instance.responsiblePerson = responsible;
         }
         await this.sectorInstanceRepo.save(instance);
-        return await this.processInstanceRepo.findOne({ where: { instanceId: processInstanceId } });
+
+        const processInstance: ProcessInstance = await this.getProcessInstance(processInstanceId);
+        this.validateProcessStatus(processInstance);
+
+        return await this.processInstanceRepo.save(processInstance)
     }
 
 
@@ -184,7 +200,7 @@ export class ProcessInstancesService {
             throw new HttpException("sector instance not match processInstance", HttpStatus.NOT_FOUND);
         }
 
-        if (currentUserSectorInstance.commitingWorker.id != userId && userId != currentUserSectorInstance.responsiblePerson.id && userId != processInstance.creator.id) {
+        if (currentUserSectorInstance.commitingWorker.id != userId && userId != currentUserSectorInstance.responsiblePerson?.id && userId != processInstance.creator.id) {
             throw new HttpException("user not have permmision to edit sector", HttpStatus.FORBIDDEN);
         }
 
@@ -197,7 +213,6 @@ export class ProcessInstancesService {
 
     private async getProcessInstanceOfBed(bedId: string): Promise<ProcessInstance> {
         return await this.processInstanceRepo.findOne({
-            relations: { bed: true, sectorInstances: true, processType: true, creator: true },
             where: {
                 bed: { id: bedId },
             },
@@ -207,7 +222,6 @@ export class ProcessInstancesService {
 
     private async getProcessInstanceOfBedInProcess(bedId: string): Promise<ProcessInstance> {
         return await this.processInstanceRepo.findOne({
-            relations: { bed: true, sectorInstances: true, processType: true, creator: true },
             where: {
                 bed: { id: bedId },
                 status: Not(Status.Done)
@@ -241,7 +255,7 @@ export class ProcessInstancesService {
         let user: User = await this.usersService.getUserById(userId);
         let isUserAManager: boolean = user.role.name == 'Admin';
         for (let instance of processInstance.sectorInstances) {
-            if (instance.status != Status.Done && (isUserAManager || instance.commitingWorker.id == userId || instance.responsiblePerson.id == userId || processInstance.creator.id == userId)) {
+            if (instance.status != Status.Done && (isUserAManager || instance.commitingWorker.id == userId || instance.responsiblePerson?.id == userId || processInstance.creator.id == userId)) {
                 if (_.isEmpty(currentSectorInstance)) {
                     currentSectorInstance = instance;
                 } else {
@@ -256,12 +270,12 @@ export class ProcessInstancesService {
         let userSectorInstances: SectorInstance[] = [];
         let user: User = await this.usersService.getUserById(userId);
         let isUserAManager: boolean = user.role.name == 'Admin';
-        
+
         if (isUserAManager) {
             return sectorInstances;
         } else {
             sectorInstances.forEach(sectorInstance => {
-                if (sectorInstance.commitingWorker.id == userId || sectorInstance.responsiblePerson.id == userId) {
+                if (sectorInstance.commitingWorker.id == userId || sectorInstance.responsiblePerson?.id == userId) {
                     userSectorInstances.push(sectorInstance)
                 }
             });

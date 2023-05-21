@@ -10,38 +10,20 @@ export class Sector {
     @Column({unique: true})
     name: string;
 
-    @ManyToOne(()=> User, {eager: true})
+    @ManyToOne(()=> User, {eager: true, nullable: true})
     @JoinColumn()
-    defaultResponsibleUser: User;
+    defaultResponsibleUser?: User;
  
-    @ManyToMany(()=> User, (user) => user.sectors_in_responsibility, {eager:true})
+    @ManyToMany(()=> User, (user) => user.sectors_in_responsibility, {eager:true, nullable: true})
     @JoinTable()
-    // @JoinTable({
-    //     name: "sector_responsible_users",
-    //     joinColumns: [
-    //         {name: "sector_id", referencedColumnName: "id"},
-    //         {name: "sector_name", referencedColumnName: "name"}
-    //     ],
-    //     inverseJoinColumns: [
-    //         {name: "responsible_user_id", referencedColumnName: "id"},
-    //         {name: "responsible_user_name", referencedColumnName: "fullname"}
-    //     ]
-    // })
-    responsibleUsers: User[];
+    responsibleUsers?: User[];
+
+    @ManyToOne(()=> User, {eager: true, nullable: true})
+    @JoinColumn()
+    defaultCommittingUser?: User;
 
     @ManyToMany(() => User, (user) => user.sectors, {eager: true})
     @JoinTable()
-    // @JoinTable({
-    //     name: "sector_committing_users",
-    //     joinColumns: [
-    //         {name: "sector_id", referencedColumnName: "id"},
-    //         {name: "sector_name", referencedColumnName: "name"}
-    //     ],
-    //     inverseJoinColumns: [
-    //         {name: "user_id", referencedColumnName: "id"},
-    //         {name: "user_name", referencedColumnName: "fullname"}
-    //     ]
-    // })
     committingUsers: User[]; 
 
     @ManyToMany(() => ProcessTemplate, (processTemplate) => processTemplate.relatedSectors)
