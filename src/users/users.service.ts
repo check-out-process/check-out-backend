@@ -8,6 +8,7 @@ import { RolesService } from 'src/roles/roles.service';
 import { Job } from 'src/jobs/jobs.entities';
 import { Role } from 'src/roles/roles.entities';
 import { SectorsService } from 'src/sectors/sectors.service';
+import * as _ from 'lodash';
 
 @Injectable()
 export class UsersService {
@@ -25,7 +26,10 @@ export class UsersService {
     }
 
     public async getUserById(userId: number): Promise<User> {
-        return await this.usersRepo.findOne({where : {id: userId}});
+        if (userId){
+            return await this.usersRepo.findOne({where : {id: userId}});
+        }
+        return null;
     }
 
     public async getUserByPhoneNumber(phoneNumber: string): Promise<User> {

@@ -35,6 +35,10 @@ export class ProcessTemplatesService {
         return await this.processTypesRepo.findOne({where: {id: typeId}})
     }
 
+    public async getProcessTypeByUUID(typeUuid: string): Promise<ProcessType>{
+        return await this.processTypesRepo.findOne({where: {uuid: typeUuid}})
+    }
+
     public async addProcessTemplate(data: AddProcessTemplateParams) : Promise<ProcessTemplate> {
         let process: ProcessTemplate = this.processTemplatesRepo.create();
         process = await this.createOrUpdateProcessTemplateFromData(process, data);
