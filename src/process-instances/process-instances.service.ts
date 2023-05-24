@@ -18,6 +18,7 @@ import { ProcessTemplatesService } from 'src/process-templates/process-templates
 import * as _ from 'lodash';
 import { Department } from 'src/department/department.entities';
 import { Room } from 'src/rooms/rooms.entities';
+import { Role } from '@checkout/types';
 
 
 @Injectable()
@@ -253,7 +254,7 @@ export class ProcessInstancesService {
         let userSectorInstances: SectorInstance[] = [];
 
         let user: User = await this.usersService.getUserById(userId);
-        let isUserAManager: boolean = user.role.name == 'Admin';
+        let isUserAManager: boolean = user.role.name == Role.Admin;
         for (let instance of processInstance.sectorInstances) {
             if (instance.status != Status.Done && (isUserAManager || instance.commitingWorker.id == userId || instance.responsiblePerson?.id == userId || processInstance.creator.id == userId)) {
                 if (_.isEmpty(currentSectorInstance)) {
@@ -269,7 +270,7 @@ export class ProcessInstancesService {
     private async getUserSectorsInstance(sectorInstances: SectorInstance[], userId: number) {
         let userSectorInstances: SectorInstance[] = [];
         let user: User = await this.usersService.getUserById(userId);
-        let isUserAManager: boolean = user.role.name == 'Admin';
+        let isUserAManager: boolean = user.role.name == Role.Admin;
 
         if (isUserAManager) {
             return sectorInstances;
@@ -303,7 +304,7 @@ export class ProcessInstancesService {
         let newSectorInstance: SectorInstance = await this.sectorInstanceRepo.create();
         newSectorInstance.instanceId = randomUUID();
         newSectorInstance.sectorId = data.id;
-        newSectorInstance.status = Status[Status.Waiting];
+        newSectorInstance.status = commitingWorker ? Status[Status.In_Progress]: Status[Status.Waiting];
         newSectorInstance.responsiblePerson = responsiblePerson;
         newSectorInstance.commitingWorker = commitingWorker;
         newSectorInstance.bed = bed;
