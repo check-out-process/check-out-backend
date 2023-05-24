@@ -304,7 +304,7 @@ export class ProcessInstancesService {
         let newSectorInstance: SectorInstance = await this.sectorInstanceRepo.create();
         newSectorInstance.instanceId = randomUUID();
         newSectorInstance.sectorId = data.id;
-        newSectorInstance.status = Status[Status.Waiting];
+        newSectorInstance.status = commitingWorker ? Status[Status.In_Progress]: Status[Status.Waiting];
         newSectorInstance.responsiblePerson = responsiblePerson;
         newSectorInstance.commitingWorker = commitingWorker;
         newSectorInstance.bed = bed;
