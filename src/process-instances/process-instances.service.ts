@@ -131,12 +131,7 @@ export class ProcessInstancesService {
         processInstance.department = department;
         processInstance.room = room;
         processInstance.isIsolation = data.isIsolation;
-
-        try {
-            await this.processInstanceRepo.save(processInstance);
-        } catch (error) {
-            const a = error;
-        }
+        processInstance.status = Status.In_Progress;
 
         return await this.processInstanceRepo.save(processInstance);
 
@@ -304,7 +299,7 @@ export class ProcessInstancesService {
         let newSectorInstance: SectorInstance = await this.sectorInstanceRepo.create();
         newSectorInstance.instanceId = randomUUID();
         newSectorInstance.sectorId = data.id;
-        newSectorInstance.status = commitingWorker ? Status[Status.In_Progress]: Status[Status.Waiting];
+        newSectorInstance.status = commitingWorker ? Status.In_Progress: Status.Waiting;
         newSectorInstance.responsiblePerson = responsiblePerson;
         newSectorInstance.commitingWorker = commitingWorker;
         newSectorInstance.bed = bed;
