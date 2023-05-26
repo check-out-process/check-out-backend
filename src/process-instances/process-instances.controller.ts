@@ -1,12 +1,15 @@
-import { CreateProcessInstanceFromDataParams, GetProcessInstanceStatusParams, ProcessInstanceStatusReturnedParams, UpdateSectorInstanceParams, UpdateSectorStatusParams } from '@checkout/types';
+import { CreateProcessInstanceFromDataParams, GetProcessInstanceStatusParams, ProcessInstanceStatusReturnedParams, Status, UpdateSectorInstanceParams, UpdateSectorStatusParams } from '@checkout/types';
 import { Body, Controller, Headers, Get, Param, Patch, Post } from '@nestjs/common';
 import { ProcessInstance } from './process-instances.entities';
 import { ProcessInstancesService } from './process-instances.service';
 import { getUserDecoded } from '../auth/auth.helper';
+import { SmsService } from 'src/sms/sms.service';
+import { SectorInstance } from './sector-instance.entities';
+
 
 @Controller('process-instances')
 export class ProcessInstancesController {
-    constructor(private processInstancesService: ProcessInstancesService) { }
+    constructor(private processInstancesService: ProcessInstancesService, private smsService: SmsService) { }
 
     @Get()
     public async getUserProcessInstances(@Headers() headers): Promise<ProcessInstance[]> {
@@ -22,7 +25,9 @@ export class ProcessInstancesController {
 
     @Post()
     public async createProcessInstance(@Body() data: CreateProcessInstanceFromDataParams): Promise<ProcessInstance> {
-        return await this.processInstancesService.createProcessInstanceFromData(data);
+        const process: ProcessInstance = await this.processInstancesService.createProcessInstanceFromData(data);
+        await this.processInstancesService.notifyNextCommitingSectorProcess(process)
+        return process;
     }
 
     @Patch(':processId/sector-instances/:sectorId')
@@ -39,6 +44,7 @@ export class ProcessInstancesController {
     @Patch(':bedId/update-status')
     public async updateProcessStatus(@Param() params, @Headers() headers, @Body() data: UpdateSectorStatusParams): Promise<void> {
         const userDecoded = getUserDecoded(headers["x-access-token"]);
-        await this.processInstancesService.updateProcessStatus(params.bedId, data, userDecoded.id);
+        const process: ProcessInstance = await this.processInstancesService.updateProcessStatus(params.bedId, data, userDecoded.id);
+        await this.processInstancesService.notifyNextCommitingSectorProcess(process)  
     }
 }

@@ -19,6 +19,8 @@ import * as _ from 'lodash';
 import { Department } from 'src/department/department.entities';
 import { Room } from 'src/rooms/rooms.entities';
 import { Role } from '@checkout/types';
+import { SmsService } from 'src/sms/sms.service';
+import { SectorsController } from 'src/sectors/sectors.controller';
 
 
 @Injectable()
@@ -34,7 +36,8 @@ export class ProcessInstancesService {
         private bedsService: BedsService,
         private usersService: UsersService,
         private sectorsService: SectorsService,
-        private processTemplatesService: ProcessTemplatesService
+        private processTemplatesService: ProcessTemplatesService,
+        private smsService: SmsService
     ) { }
 
     public async getUserProcessInstances(userId: number): Promise<ProcessInstance[]> {
@@ -157,8 +160,13 @@ export class ProcessInstancesService {
 
         const processInstance: ProcessInstance = await this.getProcessInstance(processInstanceId);
         this.validateProcessStatus(processInstance);
-
-        return await this.processInstanceRepo.save(processInstance)
+        const process: ProcessInstance = await this.processInstanceRepo.save(processInstance);
+        
+        // i put this if here , because we want to to send sms to next secotor after the sector will save in DB. 
+        if (data.status && data.status == Status.Done) {
+            this.notifyNextCommitingSectorProcess(process);        
+        }
+        return process;
     }
 
 
@@ -202,9 +210,18 @@ export class ProcessInstancesService {
 
         this.updateSectorInstanceStatus(currentUserSectorInstance, data.status);
         this.validateProcessStatus(processInstance);
-
         return await this.processInstanceRepo.save(processInstance)
+    }
 
+    public async notifyNextCommitingSectorProcess(process: ProcessInstance) {
+        if (process.status === Status.Done) {
+            const message = `התהליך הסתיים בהצלחה עבור במחלקת ${process.department.name} , חדר ${process.room.name}, מיטה ${process.bed.name}`;
+            await this.smsService.sendSms(process.creator.phoneNumber, message);
+        } else {
+            const sectorInstance: SectorInstance = process.sectorInstances.find((sectorInstance: SectorInstance) => sectorInstance.status !== Status.Done);
+            const message = `התהליך במחלקת ${process.department.name} , חדר ${process.room.name}, מיטה ${process.bed.name} מחכה לטיפולך כסקטור ${sectorInstance.name} , בהצלחה`;
+            await this.smsService.sendSms(sectorInstance.commitingWorker.phoneNumber, message);
+        }
     }
 
     private async getProcessInstanceOfBed(bedId: string): Promise<ProcessInstance> {
@@ -299,7 +316,7 @@ export class ProcessInstancesService {
         let newSectorInstance: SectorInstance = await this.sectorInstanceRepo.create();
         newSectorInstance.instanceId = randomUUID();
         newSectorInstance.sectorId = data.id;
-        newSectorInstance.status = commitingWorker ? Status.In_Progress: Status.Waiting;
+        newSectorInstance.status = commitingWorker ? Status.In_Progress : Status.Waiting;
         newSectorInstance.responsiblePerson = responsiblePerson;
         newSectorInstance.commitingWorker = commitingWorker;
         newSectorInstance.bed = bed;

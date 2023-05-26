@@ -6,15 +6,14 @@ export const databaseProviders = [
     useFactory: async () => {
       const dataSource = new DataSource({
         type: 'mssql',
-        host: 'localhost',
+        host: '193.106.55.23',
         port: 1433,
-        username: 'sa',
-        password: 'Password1',
+        username: 'cs118',
+        password: 'Honor@Cs21',
         database: 'CheckOut',
         entities: [
           __dirname + '/../**/*.entities.js',
         ],
-        synchronize: true,
         options: {encrypt: false},
       });
 

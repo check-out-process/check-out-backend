@@ -11,9 +11,10 @@ import { RolesModule } from './roles/roles.module';
 import { AuthModule } from './auth/auth.module';
 import { AuthrMiddleware } from './middleware/auth.middleware';
 import { TokenModule } from './tokens/tokens.module';
+import { SmsModule } from './sms/sms.module';
 
 @Module({
-  imports: [AuthModule, TokenModule, DepartmentModule, RoomsModule, BedsModule, SectorsModule, UsersModule, ProcessTemplatesModule, ProcessInstancesModule, JobsModule, RolesModule],
+  imports: [AuthModule, TokenModule, DepartmentModule, RoomsModule, BedsModule, SectorsModule, UsersModule, ProcessTemplatesModule, ProcessInstancesModule, JobsModule, RolesModule, SmsModule],
   controllers: [],
 
 })
