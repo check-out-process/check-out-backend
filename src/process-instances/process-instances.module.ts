@@ -9,9 +9,10 @@ import { RoomsModule } from 'src/rooms/rooms.module';
 import { DepartmentModule } from 'src/department/department.module';
 import { UsersModule } from 'src/users/users.module';
 import { SectorsModule } from 'src/sectors/sectors.module';
+import { SmsModule } from 'src/sms/sms.module';
 
 @Module({
-  imports: [DatabaseModule, BedsModule, RoomsModule, DepartmentModule, UsersModule,SectorsModule, ProcessTemplatesModule],
+  imports: [DatabaseModule, BedsModule, RoomsModule, DepartmentModule, UsersModule,SectorsModule, ProcessTemplatesModule,SmsModule],
   providers: [...processProviders, ...sectorInstanceProviders, ProcessInstancesService],
   controllers: [ProcessInstancesController]
 })
