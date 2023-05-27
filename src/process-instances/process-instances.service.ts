@@ -215,11 +215,11 @@ export class ProcessInstancesService {
 
     public async notifyNextCommitingSectorProcess(process: ProcessInstance) {
         if (process.status === Status.Done) {
-            const message = `התהליך הסתיים בהצלחה עבור במחלקת ${process.department.name} , חדר ${process.room.name}, מיטה ${process.bed.name}`;
+            const message = `התהליך הסתיים בהצלחה עבור מחלקה ${process.department.name} , חדר ${process.room.name}, מיטה ${process.bed.name}`;
             await this.smsService.sendSms(process.creator.phoneNumber, message);
         } else {
             const sectorInstance: SectorInstance = process.sectorInstances.find((sectorInstance: SectorInstance) => sectorInstance.status !== Status.Done);
-            const message = `התהליך במחלקת ${process.department.name} , חדר ${process.room.name}, מיטה ${process.bed.name} מחכה לטיפולך כסקטור ${sectorInstance.name} , בהצלחה`;
+            const message = `התהליך במחלקה ${process.department.name} , חדר ${process.room.name}, מיטה ${process.bed.name} מחכה לטיפולך בסקטור ${sectorInstance.name} , בהצלחה`;
             await this.smsService.sendSms(sectorInstance.commitingWorker.phoneNumber, message);
         }
     }
