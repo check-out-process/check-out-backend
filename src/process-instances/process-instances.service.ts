@@ -172,7 +172,7 @@ export class ProcessInstancesService {
 
     public async getProcessStatus(bedId: string, userId): Promise<ProcessInstanceStatusReturnedParams> {
         let processStatusData: ProcessInstanceStatusReturnedParams = new ProcessInstanceStatusReturnedParams();
-        const processInstance = await this.getProcessInstanceOfBed(bedId);
+        const processInstance = await this.getProcessInstanceOfBedInProcess(bedId);
         processInstance.sectorInstances = this.orderSectors(processInstance.sectorInstances, processInstance.sectorsOrder);
 
         processStatusData.processInstanceId = processInstance.instanceId;
