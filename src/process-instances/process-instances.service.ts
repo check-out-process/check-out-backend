@@ -161,10 +161,10 @@ export class ProcessInstancesService {
         const processInstance: ProcessInstance = await this.getProcessInstance(processInstanceId);
         this.validateProcessStatus(processInstance);
         const process: ProcessInstance = await this.processInstanceRepo.save(processInstance);
-        
+
         // i put this if here , because we want to to send sms to next secotor after the sector will save in DB. 
         if (data.status && data.status == Status.Done) {
-            this.notifyNextCommitingSectorProcess(process);        
+            this.notifyNextCommitingSectorProcess(process);
         }
         return process;
     }
@@ -173,22 +173,27 @@ export class ProcessInstancesService {
     public async getProcessStatus(bedId: string, userId): Promise<ProcessInstanceStatusReturnedParams> {
         let processStatusData: ProcessInstanceStatusReturnedParams = new ProcessInstanceStatusReturnedParams();
         const processInstance = await this.getProcessInstanceOfBedInProcess(bedId);
-        processInstance.sectorInstances = this.orderSectors(processInstance.sectorInstances, processInstance.sectorsOrder);
+        if (_.isEmpty(processInstance)) {
+            throw new HttpException(`there is no processInstance of bedId ${bedId}`, HttpStatus.NOT_FOUND);
+        } else {
+            processInstance.sectorInstances = this.orderSectors(processInstance.sectorInstances, processInstance.sectorsOrder);
 
-        processStatusData.processInstanceId = processInstance.instanceId;
-        processStatusData.name = processInstance.name;
-        processStatusData.description = processInstance.description;
-        processStatusData.creator = processInstance.creator.fullname;
-        processStatusData.department = processInstance.department;
-        processStatusData.room = processInstance.room;
-        processStatusData.processStatus = processInstance.status;
-        processStatusData.processType = processInstance.processType.name;
-        processStatusData.sectorInstances = processInstance.sectorInstances;
-        const { currentSectorInstance, userSectorInstances } = await this.getSectorsOfProcessInstanceOfUser(processInstance, userId);
-        processStatusData.currentSectorInstance = currentSectorInstance;
-        processStatusData.sectorInstances = userSectorInstances;
+            processStatusData.processInstanceId = processInstance.instanceId;
+            processStatusData.name = processInstance.name;
+            processStatusData.description = processInstance.description;
+            processStatusData.creator = processInstance.creator.fullname;
+            processStatusData.department = processInstance.department;
+            processStatusData.room = processInstance.room;
+            processStatusData.processStatus = processInstance.status;
+            processStatusData.processType = processInstance.processType.name;
+            processStatusData.sectorInstances = processInstance.sectorInstances;
+            const { currentSectorInstance, userSectorInstances } = await this.getSectorsOfProcessInstanceOfUser(processInstance, userId);
+            processStatusData.currentSectorInstance = currentSectorInstance;
+            processStatusData.sectorInstances = userSectorInstances;
 
-        return processStatusData;
+            return processStatusData;
+        }
+
     }
 
     public async updateProcessStatus(bedId: string, data: UpdateSectorStatusParams, userId: number): Promise<ProcessInstance> {
