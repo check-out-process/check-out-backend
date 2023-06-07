@@ -21,6 +21,8 @@ import { Room } from 'src/rooms/rooms.entities';
 import { Role } from '@checkout/types';
 import { SmsService } from 'src/sms/sms.service';
 import { SectorsController } from 'src/sectors/sectors.controller';
+import { url } from 'inspector';
+import Config from 'src/config';
 
 
 @Injectable()
@@ -219,12 +221,13 @@ export class ProcessInstancesService {
     }
 
     public async notifyNextCommitingSectorProcess(process: ProcessInstance) {
+        const finishUrl: string = `${Config.sectorFinsihUrl}/${process.bed.id}`
         if (process.status === Status.Done) {
             const message = `התהליך הסתיים בהצלחה עבור מחלקה ${process.department.name} , חדר ${process.room.name}, מיטה ${process.bed.name}`;
             await this.smsService.sendSms(process.creator.phoneNumber, message);
         } else {
             const sectorInstance: SectorInstance = process.sectorInstances.find((sectorInstance: SectorInstance) => sectorInstance.status !== Status.Done);
-            const message = `התהליך במחלקה ${process.department.name} , חדר ${process.room.name}, מיטה ${process.bed.name} מחכה לטיפולך בסקטור ${sectorInstance.name} , בהצלחה`;
+            const message = `התהליך במחלקה ${process.department.name} , חדר ${process.room.name}, מיטה ${process.bed.name} מחכה לטיפולך בסקטור ${sectorInstance.name} בהצלחה , לחץ על הקישור לסיום ${finishUrl}`;
             await this.smsService.sendSms(sectorInstance.commitingWorker.phoneNumber, message);
         }
     }
