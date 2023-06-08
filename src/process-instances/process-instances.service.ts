@@ -43,20 +43,29 @@ export class ProcessInstancesService {
     ) { }
 
     public async getUserProcessInstances(userId: number): Promise<ProcessInstance[]> {
-        const instances = await this.processInstanceRepo
-            .createQueryBuilder('processInstance')
-            .leftJoinAndSelect("processInstance.bed", "bed")
-            .leftJoinAndSelect("processInstance.department", "department")
-            .leftJoinAndSelect("processInstance.room", "room")
-            .leftJoinAndSelect("processInstance.sectorInstances", "sectorInstance")
-            .leftJoinAndSelect("sectorInstance.commitingWorker", "commitingWorker")
-            .leftJoinAndSelect("sectorInstance.responsiblePerson", "responsiblePerson")
-            .leftJoinAndSelect("processInstance.processType", "processType")
-            .leftJoinAndSelect("processInstance.creator", "creator")
-            .where("creator.id = :userId", { userId })
-            .orWhere("commitingWorker.id = :userId", { userId })
-            .orWhere("responsiblePerson.id = :userId", { userId })
-            .getMany();
+        const user: User = await this.usersService.getUserById(userId);
+        let instances = [];
+
+        if (user) {
+            if (user.role.name === Role.Admin) {
+                instances = await this.processInstanceRepo.find();
+            } else {
+                instances = await this.processInstanceRepo
+                    .createQueryBuilder('processInstance')
+                    .leftJoinAndSelect("processInstance.bed", "bed")
+                    .leftJoinAndSelect("processInstance.department", "department")
+                    .leftJoinAndSelect("processInstance.room", "room")
+                    .leftJoinAndSelect("processInstance.sectorInstances", "sectorInstance")
+                    .leftJoinAndSelect("sectorInstance.commitingWorker", "commitingWorker")
+                    .leftJoinAndSelect("sectorInstance.responsiblePerson", "responsiblePerson")
+                    .leftJoinAndSelect("processInstance.processType", "processType")
+                    .leftJoinAndSelect("processInstance.creator", "creator")
+                    .where("creator.id = :userId", { userId })
+                    .orWhere("commitingWorker.id = :userId", { userId })
+                    .orWhere("responsiblePerson.id = :userId", { userId })
+                    .getMany();
+            }
+        }
 
         instances.forEach(instance => {
             delete instance.sectorInstances;
