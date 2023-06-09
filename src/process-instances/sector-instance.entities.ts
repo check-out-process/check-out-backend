@@ -20,7 +20,7 @@ export class SectorInstance {
     process: ProcessInstance;
 
     @Column({
-        default: Status.Waiting
+        default: Status.Waiting_Confirm
     })
     status: Status;
 
