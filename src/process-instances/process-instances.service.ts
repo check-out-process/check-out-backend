@@ -44,7 +44,7 @@ export class ProcessInstancesService {
 
     public async getUserProcessInstances(userId: number): Promise<ProcessInstance[]> {
         const user: User = await this.usersService.getUserById(userId);
-        let instances = [];
+        let instances: ProcessInstance[] = [];
 
         if (user) {
             if (user.role.name === Role.Admin) {
@@ -68,8 +68,7 @@ export class ProcessInstancesService {
         }
 
         instances.forEach(instance => {
-            delete instance.sectorInstances;
-            delete instance.sectorsOrder;
+            instance.sectorInstances= this.orderSectors(instance.sectorInstances, instance.sectorsOrder);
         });
 
         return instances;
@@ -333,7 +332,7 @@ export class ProcessInstancesService {
         let newSectorInstance: SectorInstance = await this.sectorInstanceRepo.create();
         newSectorInstance.instanceId = randomUUID();
         newSectorInstance.sectorId = data.id;
-        newSectorInstance.status = commitingWorker ? Status.In_Progress : Status.Waiting;
+        newSectorInstance.status = commitingWorker ? Status.Waiting_Confirm : Status.Waiting_Assigning;
         newSectorInstance.responsiblePerson = responsiblePerson;
         newSectorInstance.commitingWorker = commitingWorker;
         newSectorInstance.bed = bed;
