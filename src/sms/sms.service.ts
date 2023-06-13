@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import * as _ from 'lodash';
 import fetch from 'node-fetch';
 import { Twilio } from 'twilio';
-
+import Config from 'src/config';
 
 @Injectable()
 export class SmsService {
@@ -42,14 +42,21 @@ export class SmsService {
     }
 
     public async sendWhatsAppMessage(phoneNumber: string, message: string){
-        const accountSid = 'AC50d05de9a73212838c6579b9c014be72';
-        const authToken = 'e96ddb04f1c4e04546078e67808941c9';
+        const accountSid = Config.whatsAppAccountSeed;
+        const authToken = Config.whatsAppAuthToken;
+
+        if (phoneNumber.length == 10 && phoneNumber[0] =='0'){
+            phoneNumber = phoneNumber.substring(1);
+        }
+        if (!phoneNumber.includes("+972")){
+            phoneNumber = `+972${phoneNumber}`;
+        }
         const client: Twilio = new Twilio(accountSid, authToken);
         client.messages
             .create({
                 body: message,
                 from: 'whatsapp:+14155238886',
-                to: `whatsapp:+972${phoneNumber}`
+                to: `whatsapp:${phoneNumber}`
             })
             .then(message => console.log(message.sid))
             
