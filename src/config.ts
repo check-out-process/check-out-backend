@@ -1,5 +1,5 @@
 const Config = {
-    sectorFinsihUrl: 'http://checkout.cs.colman.ac.il/scanBed'
+    sectorFinsihUrl: 'http://192.168.1.38:3000'
 }
 
 export default Config;
