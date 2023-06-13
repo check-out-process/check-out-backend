@@ -38,6 +38,7 @@
     "npm": "^9.6.3",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0",
+    "twilio": "^4.11.2",
     "typeorm": "^0.3.6",
     "uuid": "^9.0.0",
     "webpack": "^5.81.0"
