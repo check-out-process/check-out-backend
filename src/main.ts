@@ -12,6 +12,6 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
   app.enableCors();
 
-  await app.listen(8081);
+  await app.listen(8080);
 }
 bootstrap();
