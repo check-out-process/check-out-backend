@@ -1,5 +1,5 @@
 import { CreateProcessInstanceFromDataParams, GetProcessInstanceStatusParams, ProcessInstanceStatusReturnedParams, Status, UpdateSectorInstanceParams, UpdateSectorStatusParams } from '@checkout/types';
-import { Body, Controller, Headers, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Headers, Get, Param, Patch, Post, HttpException, HttpStatus } from '@nestjs/common';
 import { ProcessInstance } from './process-instances.entities';
 import { ProcessInstancesService } from './process-instances.service';
 import { getUserDecoded } from '../auth/auth.helper';
@@ -46,5 +46,15 @@ export class ProcessInstancesController {
         const userDecoded = getUserDecoded(headers["x-access-token"]);
         const process: ProcessInstance = await this.processInstancesService.updateProcessStatus(params.bedId, data, userDecoded.id);
         await this.processInstancesService.notifyNextCommitingSectorProcess(process)  
+    }
+
+    @Patch(':processInstanceId/sectorInstance/:sectorInstanceId/recive')
+    public async updateSectorStartWork(@Param() params, @Headers() headers): Promise<void> {
+        const sector: SectorInstance = await this.processInstancesService.getSectorInstance(params.sectorInstanceId);
+        if (sector.status === Status.Done){
+            throw new HttpException(`Sector status already Done , cannot update it`, HttpStatus.CONFLICT)
+        }
+        await this.processInstancesService.updateSectorInstanceStatus(sector, Status.In_Progress);
+        await this.processInstancesService.sendFinsihMessageToSector(sector,params.processInstanceId)  
     }
 }
