@@ -85,7 +85,6 @@ export class AuthService {
                         throw new HttpException('invalid request', HttpStatus.FORBIDDEN);
                     }
                     if (!user.tokens.map(token => token.token).includes(token)) {
-                        await this.tokenService.removeAllTokenOfUserId(userId);
                         throw new HttpException('invalid request', HttpStatus.FORBIDDEN);
                     }
 
