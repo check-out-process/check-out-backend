@@ -1,4 +1,4 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { DatabaseModule } from 'src/database/database.module';;
 import { TokensController } from './tokens.controller';
 import { TokensService } from './tokens.service';
