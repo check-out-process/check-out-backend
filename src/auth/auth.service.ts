@@ -98,6 +98,45 @@ export class AuthService {
         });
     }
 
+    public async refreshTokens(token: string) {
+        if (token == null) {
+            throw new HttpException("Invalid refresh token", HttpStatus.UNAUTHORIZED);
+        }
+        return await verify(token, process.env.REFRESH_TOKEN_SECRET, async (err, userInfo) => {
+            if (err) {
+                throw new HttpException(err.message, HttpStatus.FORBIDDEN);
+            }else{
+                const userId = userInfo.id;
+                try {
+                    const user = await this.userService.getUserById(userId);
+                    if (user == null) {
+                        throw new HttpException('invalid request', HttpStatus.FORBIDDEN);
+                    }
+                    if (!user.tokens.map(token => token.token).includes(token)) {
+                        throw new HttpException('invalid request', HttpStatus.FORBIDDEN);
+                    }
+    
+                    const accessToken = sign(
+                        { id: user.id, phoneNumber: user.phoneNumber },
+                        process.env.ACCESS_TOKEN_SECRET,
+                        { expiresIn: process.env.JWT_TOKEN_EXPIRATION }
+                    );
+                    const refreshToken = sign(
+                        { id: user.id, phoneNumber: user.phoneNumber },
+                        process.env.REFRESH_TOKEN_SECRET,
+                    );
+    
+                    await this.tokenService.setTokenValue(token, refreshToken);
+    
+                    return { accessToken, refreshToken };
+                } catch (error) {
+    
+                }
+            }
+           
+        });
+    }
+
     private async encryptPassword(user: UserCreationParams) {
         const salt = await genSalt(10);
 
