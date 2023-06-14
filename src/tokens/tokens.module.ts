@@ -6,7 +6,7 @@ import { tokensProviders } from './tokens.provider';
 import { UsersModule } from 'src/users/users.module';
 
 @Module({
-  imports: [DatabaseModule, forwardRef(() => UsersModule)],
+  imports: [DatabaseModule, UsersModule],
   providers: [...tokensProviders, TokensService ],
   controllers: [TokensController],
   exports: [TokensService]
