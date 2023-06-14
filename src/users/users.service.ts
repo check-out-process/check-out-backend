@@ -1,4 +1,4 @@
-import { Inject, Injectable, forwardRef } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Sector } from 'src/sectors/sectors.entities';
 import { Repository } from 'typeorm';
 import { UserCreationParams, UserPatchAddSectorParams, UserPatchParams } from '@checkout/types';
@@ -9,8 +9,6 @@ import { Job } from 'src/jobs/jobs.entities';
 import { Role } from 'src/roles/roles.entities';
 import { SectorsService } from 'src/sectors/sectors.service';
 import * as _ from 'lodash';
-import { TokensService } from 'src/tokens/tokens.service';
-import { TokenModule } from 'src/tokens/tokens.module';
 
 @Injectable()
 export class UsersService {
