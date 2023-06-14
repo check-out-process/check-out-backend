@@ -18,7 +18,7 @@ export class UsersService {
         private usersRepo: Repository<User>,
         private jobService: JobsService,
         private roleService: RolesService,
-        private sectorService: SectorsService,
+        private sectorService: SectorsService
     ) {}
 
     public async getAllUsers() : Promise<User[]> {
@@ -43,7 +43,7 @@ export class UsersService {
         return newUser;
     }
 
-    public async updateUser(userId: number, data: UserPatchParams): Promise<User> {
+    public async updateUser(userId: number, data: UserCreationParams): Promise<User> {
         let userToUpdate : User = await this.getUserById(userId);
         userToUpdate = await this.createOrUpdateUserFromParams(userToUpdate, data);
         this.usersRepo.save(userToUpdate);
