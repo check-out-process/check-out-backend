@@ -12,7 +12,6 @@ export class TokensService {
     constructor(
         @Inject('TOKEN_REPOSITORY')
         private tokensRepo: Repository<Token>,
-        private usersService: UsersService
     ) { }
     public async getTokensByUserId(userId: number): Promise<Token[]> {
         return await this.tokensRepo.find({ where: { userId } });
