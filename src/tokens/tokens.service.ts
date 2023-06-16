@@ -24,19 +24,19 @@ export class TokensService {
     public async setTokenValue(token: string, newTokenValue: string): Promise<Token> {
         let newToken: Token = await this.getTokenById(token);
         newToken = createOrUpdateObjectFromParams(newToken, { token: newTokenValue });
-        this.tokensRepo.save(newToken);
+        await this.tokensRepo.save(newToken);
         return newToken;
 
     }
 
     public async removeAllTokenOfUserId(userId: number) {
         const tokens : Token[] = await this.getTokensByUserId(userId);
-        this.tokensRepo.remove(tokens);
+        await this.tokensRepo.remove(tokens);
     }
 
     public async removeTokenById(id: string) {
         const token : Token = await this.getTokenById(id);
-        this.tokensRepo.remove(token);
+        await this.tokensRepo.remove(token);
     }
 
     public async postTokensToUserId(userId: number, token: string): Promise<Token> {
