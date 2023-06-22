@@ -1,7 +1,7 @@
 const Config = {
     sectorFinsihUrl: 'http://checkout.cs.colman.ac.il/scanBed',
-    whatsAppAccountSeed: 'AC50d05de9a73212838c6579b9c014be72',
-    whatsAppAuthToken: 'bc48fb5bd784c762779644161a88571d'
+    whatsAppAccountSeed: 'ACc1554b991c424a9e18071b088bc01b29',
+    whatsAppAuthToken: 'cb9c4e1bfc52a3265dff012c2f435db7'
 }
 
 export default Config;
