@@ -4,7 +4,7 @@ import { QueryFailedError, Repository } from 'typeorm';
 import { BedCreationParams, BedPatchParams } from '@checkout/types';
 import { Bed } from './beds.entities';
 import * as _ from 'lodash';
-import { createOrUpdateObjectFromParams } from 'src/common/utils';
+import { createOrUpdateObjectFromParams } from '../common/utils';
 
 @Injectable()
 export class BedsService {

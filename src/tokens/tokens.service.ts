@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Token } from './tokens.entities';
 import { sign, verify } from "jsonwebtoken";
-import { createOrUpdateObjectFromParams } from 'src/common/utils';
+import { createOrUpdateObjectFromParams } from '../common/utils';
 import { randomUUID } from 'crypto';
 import { UsersService } from 'src/users/users.service';
 

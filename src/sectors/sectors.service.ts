@@ -4,10 +4,10 @@ import { Repository } from 'typeorm';
 import * as _ from 'lodash';
 import { Sector } from './sectors.entities';
 import { SectorCreationParams, SectorPatchAddResponsiblesParams, SectorPatchAddUsersParams, SectorPatchParams, SectorQueryParams } from '@checkout/types';
-import { User } from 'src/users/users.entities';
-import { UsersHelper } from 'src/users/users.helper';
-import { ProcessTemplate, ProcessType } from 'src/process-templates/process-templates.entities';
-import { ProcessTemplatesHelper } from 'src/process-templates/process-templates.helper';
+import { User } from '../users/users.entities';
+import { UsersHelper } from '../users/users.helper';
+import { ProcessTemplate, ProcessType } from '../process-templates/process-templates.entities';
+import { ProcessTemplatesHelper } from '../process-templates/process-templates.helper';
 import { log } from 'console';
 
 @Injectable()

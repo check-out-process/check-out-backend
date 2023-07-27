@@ -1,15 +1,15 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Sector } from 'src/sectors/sectors.entities';
+import { Sector } from '../sectors/sectors.entities';
 import { EntityPropertyNotFoundError, Repository } from 'typeorm';
 import { UserCreationParams, UserPatchAddSectorParams, UserPatchParams } from '@checkout/types';
 import { User } from './users.entities';
-import { JobsService } from 'src/jobs/jobs.service';
-import { RolesService } from 'src/roles/roles.service';
-import { Job } from 'src/jobs/jobs.entities';
-import { Role } from 'src/roles/roles.entities';
-import { SectorsService } from 'src/sectors/sectors.service';
+import { JobsService } from '../jobs/jobs.service';
+import { RolesService } from '../roles/roles.service';
+import { Job } from '../jobs/jobs.entities';
+import { Role } from '../roles/roles.entities';
+import { SectorsService } from '../sectors/sectors.service';
 import * as _ from 'lodash';
-import { TokensService } from 'src/tokens/tokens.service';
+import { TokensService } from '../tokens/tokens.service';
 
 @Injectable()
 export class UsersService {

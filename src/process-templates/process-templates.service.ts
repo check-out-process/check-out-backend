@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { createOrUpdateObjectFromParams } from 'src/common/utils';
-import { Sector } from 'src/sectors/sectors.entities';
-import { SectorsHelper } from 'src/sectors/sectors.helper';
+import { createOrUpdateObjectFromParams } from '../common/utils';
+import { Sector } from '../sectors/sectors.entities';
+import { SectorsHelper } from '../sectors/sectors.helper';
 import { Repository } from 'typeorm';
 import { AddProcessTemplateParams, AddProcessTypeParams, PatchProcessTemplateParams } from '@checkout/types';
 import { ProcessTemplate, ProcessType } from './process-templates.entities';

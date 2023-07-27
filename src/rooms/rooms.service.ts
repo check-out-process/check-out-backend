@@ -4,7 +4,7 @@ import { RoomCreationParams, RoomPatchParams } from '@checkout/types';
 import { randomUUID } from 'crypto';
 import { Repository } from 'typeorm';
 import * as _ from 'lodash';
-import { createOrUpdateObjectFromParams } from 'src/common/utils';
+import { createOrUpdateObjectFromParams } from '../common/utils';
 
 @Injectable()
 export class RoomsService {

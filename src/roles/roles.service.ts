@@ -2,7 +2,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Role } from './roles.entities';
 import { CreateRoleParams } from '@checkout/types';
-import { createOrUpdateObjectFromParams } from 'src/common/utils';
+import { createOrUpdateObjectFromParams } from '../common/utils';
 import { randomUUID } from 'crypto';
 
 @Injectable()
