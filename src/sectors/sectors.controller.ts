@@ -2,6 +2,7 @@ import { Controller, Get, Param, Body, Post, Delete, Patch, Query } from '@nestj
 import { SectorCreationParams, SectorPatchAddResponsiblesParams, SectorPatchAddUsersParams, SectorPatchParams, SectorQueryParams } from '@checkout/types';
 import { Sector } from './sectors.entities';
 import { SectorsService } from './sectors.service';
+import { ApiParam } from '@nestjs/swagger';
 
 @Controller('sectors')
 export class SectorsController {
@@ -13,6 +14,7 @@ export class SectorsController {
     }
 
     @Get(':sectorID')
+    @ApiParam({name: 'sectorID', description: 'The id of the sector'})
     public async getSector(@Param() params) : Promise<Sector> {
         let sector: Sector = await this.sectorsService.getSector(params.sectorID);
         return sector
@@ -28,23 +30,8 @@ export class SectorsController {
         return await this.sectorsService.addSector(data);
     }
 
-    // @Patch(':sectorID')
-    // public async updateSector(
-    //     @Param() params,
-    //     @Body() data: SectorPatchParams | SectorPatchAddUserParams) : Promise<Sector> {
-    //         if (data instanceof SectorPatchParams){
-    //             return await this.sectorsService.updateSector(params.sectorID, data);
-    //         }
-    //         else if (data instanceof SectorPatchAddUserParams){
-    //             return await this.sectorsService.addComitterToSector(params.sectorID, data);
-    //         }
-    //         else{
-    //             console.log("error");
-    //             return null
-    //         }
-    // }
-
     @Patch(':sectorID')
+    @ApiParam({name: 'sectorID', description: 'The id of the sector'})
     public async updateSector(
         @Param() params,
         @Body() data: SectorPatchParams ) : Promise<Sector> {
@@ -52,6 +39,7 @@ export class SectorsController {
     }
 
     @Patch(':sectorID/add-committers')
+    @ApiParam({name: 'sectorID', description: 'The id of the sector'})
     public async addCommittersToSector(
         @Param() params,
         @Body() data: SectorPatchAddUsersParams) : Promise<Sector>
@@ -60,6 +48,7 @@ export class SectorsController {
         }
 
     @Patch(':sectorID/add-responsibles')
+    @ApiParam({name: 'sectorID', description: 'The id of the sector'})
     public async addResponsiblesToSector(
         @Param() params,
         @Body() data: SectorPatchAddResponsiblesParams) : Promise<Sector>
@@ -69,6 +58,7 @@ export class SectorsController {
 
 
     @Delete(':sectorID')
+    @ApiParam({name: 'sectorID', description: 'The id of the sector'})
     public async deleteSector(@Param() params) : Promise<Sector> {
         return await this.sectorsService.deleteSector(params.sectorID);
     }

@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/commo
 import { UserPatchAddSectorParams, UserPatchParams } from '@checkout/types';
 import { User } from './users.entities';
 import { UsersService } from './users.service';
+import { ApiParam } from '@nestjs/swagger';
 
 @Controller('users')
 export class UsersController {
@@ -13,12 +14,15 @@ export class UsersController {
     }
 
     @Get(':userID')
+    @ApiParam({name: 'userID'})
     public async getUserById(@Param() params): Promise<User>{
         const user : User = await this.usersService.getUserById(params.userID);
         await user.sectors;
         return user;
     }
+
     @Patch(':userID')
+    @ApiParam({name: 'userID'})
     public async updateUser(
         @Param() params,
         @Body() data: UserPatchParams | UserPatchAddSectorParams): Promise<User>{
@@ -34,6 +38,7 @@ export class UsersController {
     }
 
     @Delete(':userID')
+    @ApiParam({name: 'userID'})
     public async deleteUser(@Param() params): Promise<User>{
         return await this.usersService.deleteUser(params.userID);
     }
