@@ -1,4 +1,4 @@
-import { Sector } from "src/sectors/sectors.entities";
+import { Sector } from "../sectors/sectors.entities";
 import { Column, Entity, Generated, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToOne, PrimaryColumn } from "typeorm";
 
 

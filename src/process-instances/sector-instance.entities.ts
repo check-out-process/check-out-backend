@@ -1,6 +1,6 @@
 import { Status } from "@checkout/types";
-import { Bed } from "src/beds/beds.entities";
-import { User } from "src/users/users.entities";
+import { Bed } from "../beds/beds.entities";
+import { User } from "../users/users.entities";
 import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryColumn, UpdateDateColumn } from "typeorm";
 import { ProcessInstance } from "./process-instances.entities";
 

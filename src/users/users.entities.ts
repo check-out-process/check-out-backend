@@ -1,8 +1,8 @@
 import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
-import { Sector } from "src/sectors/sectors.entities";
-import { Job } from "src/jobs/jobs.entities";
-import { Role } from "src/roles/roles.entities";
-import { Token } from "src/tokens/tokens.entities";
+import { Sector } from "../sectors/sectors.entities";
+import { Job } from "../jobs/jobs.entities";
+import { Role } from "../roles/roles.entities";
+import { Token } from "../tokens/tokens.entities";
 
 @Entity()
 export class User {

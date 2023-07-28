@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { BedsService } from './beds.service';
 import { BedsController } from './beds.controller';
-import { DatabaseModule } from 'src/database/database.module';
+import { DatabaseModule } from '../database/database.module';
 import { bedsProviders } from './beds.providers';
 
 @Module({
