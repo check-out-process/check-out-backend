@@ -1,5 +1,5 @@
-import { ProcessTemplate, ProcessType } from "src/process-templates/process-templates.entities";
-import { User } from "src/users/users.entities";
+import { ProcessTemplate, ProcessType } from "../process-templates/process-templates.entities";
+import { User } from "../users/users.entities";
 import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToOne, PrimaryColumn } from "typeorm";
 
 @Entity()
@@ -31,17 +31,6 @@ export class Sector {
 
     @ManyToMany(() => ProcessType, (pt) => pt.relatedSectors, {eager: true})
     @JoinTable()
-    // @JoinTable({
-    //     name: "sector_process_type",
-    //     joinColumns: [
-    //         {name: "sector_id", referencedColumnName: "id"},
-    //         {name: "sector_name", referencedColumnName: "name"}
-    //     ],
-    //     inverseJoinColumns: [
-    //         {name: "process_type_name", referencedColumnName: "name"},
-    //         {name: "process_type_id", referencedColumnName: "id"}
-    //     ]
-    // })
     processTypes: ProcessType[];
 
 }

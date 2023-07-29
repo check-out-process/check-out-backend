@@ -22,4 +22,9 @@ export class AuthController {
     async logOut(@Headers() headers) {
         return await this.authService.logout(headers["x-access-token"]);
     }
+
+    @Post('token/refresh')
+    public async refreshTokens(@Body() data: any) {
+        return await this.authService.refreshTokens(data.token);
+    }
 }

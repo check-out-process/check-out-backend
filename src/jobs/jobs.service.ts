@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Job } from './jobs.entities';
 import { CreateJobParams } from '@checkout/types';
-import { createOrUpdateObjectFromParams } from 'src/common/utils';
+import { createOrUpdateObjectFromParams } from '../common/utils';
 import { randomUUID } from 'crypto';
 
 @Injectable()

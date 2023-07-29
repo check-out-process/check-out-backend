@@ -1,11 +1,11 @@
-import { Bed } from "src/beds/beds.entities";
-import { ProcessType } from "src/process-templates/process-templates.entities";
-import { User } from "src/users/users.entities";
+import { Bed } from "../beds/beds.entities";
+import { ProcessType } from "../process-templates/process-templates.entities";
+import { User } from "../users/users.entities";
 import { Column, CreateDateColumn, Entity, Index, JoinColumn, JoinTable, ManyToOne, OneToMany, OneToOne, PrimaryColumn, UpdateDateColumn } from "typeorm";
 import { SectorInstance } from "./sector-instance.entities";
 import { Status } from "@checkout/types";
-import { Room } from "src/rooms/rooms.entities";
-import { Department } from "src/department/department.entities";
+import { Room } from "../rooms/rooms.entities";
+import { Department } from "../department/department.entities";
 
 @Entity()
 export class ProcessInstance{

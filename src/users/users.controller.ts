@@ -1,5 +1,4 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
-import { UserPatchAddSectorParams, UserPatchParams } from '@checkout/types';
 import { User } from './users.entities';
 import { UsersService } from './users.service';
 import { ApiForbiddenResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiTags } from '@nestjs/swagger';
@@ -29,16 +28,8 @@ export class UsersController {
     @ApiOkResponse({description: 'User edited'})
     public async updateUser(
         @Param() params,
-        @Body() data: UserPatchParams | UserPatchAddSectorParams): Promise<User>{
-            if (data instanceof UserPatchParams){
-                return await this.usersService.updateUser(params.userID, data);
-            }
-            else if (data instanceof UserPatchAddSectorParams){
-                return await this.usersService.addSectorToUser(params.userID, data);
-            }
-            else{
-                console.log("error");
-            }
+        @Body() data: any): Promise<User>{
+            return await this.usersService.updateUser(params.userID, data as any);
     }
 
     @Delete(':userID')

@@ -1,4 +1,4 @@
-import { NotFoundError } from "src/common/exceptions";
+import { NotFoundError } from "../common/exceptions";
 import { ProcessTemplate, ProcessType } from "./process-templates.entities";
 import fetch from 'node-fetch';
 

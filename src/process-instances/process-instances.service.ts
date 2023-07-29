@@ -1,28 +1,28 @@
 import { CreateProcessInstanceFromDataParams, NewSectorInstanceData, ProcessInstanceStatusReturnedParams, Status, UpdateSectorInstanceParams, UpdateSectorStatusParams } from '@checkout/types';
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { Bed } from 'src/beds/beds.entities';
-import { ProcessType } from 'src/process-templates/process-templates.entities';
-import { Sector } from 'src/sectors/sectors.entities';
-import { User } from 'src/users/users.entities';
+import { Bed } from '../beds/beds.entities';
+import { ProcessType } from '../process-templates/process-templates.entities';
+import { Sector } from '../sectors/sectors.entities';
+import { User } from '../users/users.entities';
 import { Not, Repository } from 'typeorm';
 import { ProcessInstance } from './process-instances.entities';
 import { SectorInstance } from './sector-instance.entities';
 import { log } from 'console';
-import { DepartmentService } from 'src/department/department.service';
-import { RoomsService } from 'src/rooms/rooms.service';
-import { BedsService } from 'src/beds/beds.service';
-import { UsersService } from 'src/users/users.service';
-import { SectorsService } from 'src/sectors/sectors.service';
-import { ProcessTemplatesService } from 'src/process-templates/process-templates.service';
+import { DepartmentService } from '../department/department.service';
+import { RoomsService } from '../rooms/rooms.service';
+import { BedsService } from '../beds/beds.service';
+import { UsersService } from '../users/users.service';
+import { SectorsService } from '../sectors/sectors.service';
+import { ProcessTemplatesService } from '../process-templates/process-templates.service';
 import * as _ from 'lodash';
-import { Department } from 'src/department/department.entities';
-import { Room } from 'src/rooms/rooms.entities';
+import { Department } from '../department/department.entities';
+import { Room } from '../rooms/rooms.entities';
 import { Role } from '@checkout/types';
-import { SmsService } from 'src/sms/sms.service';
-import { SectorsController } from 'src/sectors/sectors.controller';
+import { SmsService } from '../sms/sms.service';
+import { SectorsController } from '../sectors/sectors.controller';
 import { url } from 'inspector';
-import Config from 'src/config';
+import Config from '../config';
 
 
 @Injectable()
@@ -150,6 +150,7 @@ export class ProcessInstancesService {
 
     }
 
+    
     public async updateSectorInstance(data: UpdateSectorInstanceParams, processInstanceId: string, sectorInstanceId: string): Promise<ProcessInstance> {
         let instance = await this.sectorInstanceRepo.findOne({ where: { instanceId: sectorInstanceId } });
         if (data.status) {
@@ -173,7 +174,7 @@ export class ProcessInstancesService {
         const process: ProcessInstance = await this.processInstanceRepo.save(processInstance);
 
         // i put this if here , because we want to to send sms to next secotor after the sector will save in DB. 
-        if (data.status && data.status == Status.Done) {
+        if (data.status && data.status == Status.Done || data.status == Status.Waiting_Confirm) {
             this.notifyNextCommitingSectorProcess(process);
         }
         return process;
@@ -208,6 +209,7 @@ export class ProcessInstancesService {
 
     public async updateProcessStatus(bedId: string, data: UpdateSectorStatusParams, userId: number): Promise<ProcessInstance> {
         const processInstance: ProcessInstance = await this.getProcessInstance(data.processInstanceId);
+        const user: User = await this.usersService.getUserById(userId);
 
         if (processInstance.bed.id != bedId) {
             throw new HttpException("process instance not match to bed", HttpStatus.NOT_FOUND);
@@ -218,8 +220,8 @@ export class ProcessInstancesService {
         if (!currentUserSectorInstance || currentUserSectorInstance.instanceId != data.sectorInstanceId) {
             throw new HttpException("sector instance not match processInstance", HttpStatus.NOT_FOUND);
         }
-
-        if (currentUserSectorInstance.commitingWorker.id != userId && userId != currentUserSectorInstance.responsiblePerson?.id && userId != processInstance.creator.id) {
+        
+        if (user.role.name !== Role.Admin && currentUserSectorInstance.commitingWorker.id != userId && userId != currentUserSectorInstance.responsiblePerson?.id && userId != processInstance.creator.id) {
             throw new HttpException("user not have permmision to edit sector", HttpStatus.FORBIDDEN);
         }
 
@@ -229,15 +231,22 @@ export class ProcessInstancesService {
     }
 
     public async notifyNextCommitingSectorProcess(process: ProcessInstance) {
-        const finishUrl: string = `${Config.sectorFinsihUrl}/${process.bed.id}`
         if (process.status === Status.Done) {
             const message = `התהליך הסתיים בהצלחה עבור מחלקה ${process.department.name} , חדר ${process.room.name}, מיטה ${process.bed.name}`;
             await this.smsService.sendSms(process.creator.phoneNumber, message);
         } else {
             const sectorInstance: SectorInstance = process.sectorInstances.find((sectorInstance: SectorInstance) => sectorInstance.status !== Status.Done);
-            const message = `התהליך במחלקה ${process.department.name} , חדר ${process.room.name}, מיטה ${process.bed.name} מחכה לטיפולך בסקטור ${sectorInstance.name} בהצלחה , לחץ על הקישור לסיום ${finishUrl}`;
+            const startUrl: string = `${Config.webUrl}/processes/${process.instanceId}/sectors/${sectorInstance.instanceId}/recive`
+            const message = `התהליך במחלקה ${process.department.name} , חדר ${process.room.name}, מיטה ${process.bed.name} מחכה לטיפולך בסקטור ${sectorInstance.name} בהצלחה , לחץ על הקישור לאישור ${startUrl}`;
             await this.smsService.sendSms(sectorInstance.commitingWorker.phoneNumber, message);
         }
+    }
+
+    public async sendFinsihMessageToSector(sector: SectorInstance,processInstanceId: string){
+        const processInstance: ProcessInstance = await this.getProcessInstance(processInstanceId);
+        const finishUrl: string = `${Config.webUrl}/scanBed/${sector.bed.id}`
+        const message = `התהליך במחלקה ${processInstance.department.name} , חדר ${processInstance.room.name}, מיטה ${processInstance.bed.name} מחכה לטיפולך בסקטור ${sector.name} בהצלחה , לחץ על הקישור לסיום ${finishUrl}`;
+        await this.smsService.sendSms(sector.commitingWorker.phoneNumber, message);
     }
 
     private async getProcessInstanceOfBed(bedId: string): Promise<ProcessInstance> {
@@ -258,7 +267,7 @@ export class ProcessInstancesService {
         })
     }
 
-    private updateSectorInstanceStatus(sectorInstance: SectorInstance, status: Status): void {
+    public async updateSectorInstanceStatus(sectorInstance: SectorInstance, status: Status): Promise<void> {
         if (sectorInstance.status > status) {
             //ToDo: change because its enum string
         }
@@ -271,6 +280,7 @@ export class ProcessInstancesService {
         if (status == Status.Done) {
             sectorInstance.endedAt = new Date()
         }
+        await this.sectorInstanceRepo.save(sectorInstance);
     }
 
     private getSectorBysectorInstanceId(processInstance: ProcessInstance, sectorInstanceId: string): SectorInstance {

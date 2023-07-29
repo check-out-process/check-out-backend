@@ -1,5 +1,5 @@
 import { IsOptional } from "class-validator";
-import { User } from "src/users/users.entities";
+import { User } from "../users/users.entities";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 
 @Entity()
