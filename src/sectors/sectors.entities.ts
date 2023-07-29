@@ -31,17 +31,6 @@ export class Sector {
 
     @ManyToMany(() => ProcessType, (pt) => pt.relatedSectors, {eager: true})
     @JoinTable()
-    // @JoinTable({
-    //     name: "sector_process_type",
-    //     joinColumns: [
-    //         {name: "sector_id", referencedColumnName: "id"},
-    //         {name: "sector_name", referencedColumnName: "name"}
-    //     ],
-    //     inverseJoinColumns: [
-    //         {name: "process_type_name", referencedColumnName: "name"},
-    //         {name: "process_type_id", referencedColumnName: "id"}
-    //     ]
-    // })
     processTypes: ProcessType[];
 
 }
