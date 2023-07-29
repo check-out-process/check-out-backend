@@ -83,13 +83,11 @@ export class UsersService {
             }
         });
         if (data.jobId) {
-            //ToDo: try catch
             const job: Job = await this.jobService.getJob(data.jobId);
             user.job = job;
         }
 
         if (data.roleId) {
-            //ToDo: try catch
             const role: Role = await this.roleService.getRoleById(data.roleId);
             user.role = role;
         }
