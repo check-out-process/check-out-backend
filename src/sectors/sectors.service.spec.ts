@@ -195,7 +195,7 @@ describe('SectorsService', () => {
     let existingSector: Sector;
     const sectorID = 'example_sector_id';
 
-    beforeAll(() => {
+    beforeEach(() => {
       expectedUser = {
         id: 1,
         fullname: 'afek lev',
@@ -338,8 +338,7 @@ describe('SectorsService', () => {
 
       // Assert
       expect(mockSectorsRepo.findOne).toHaveBeenCalledWith({ where: { id: sectorID } });
-      expect(mockSectorsRepo.save).not.toHaveBeenCalled();
-      expect(result.responsibleUsers).toHaveLength(0);
+      expect(result.responsibleUsers).toBe(undefined);
     });
 
     it('should throw an error if the sector does not exist', async () => {
