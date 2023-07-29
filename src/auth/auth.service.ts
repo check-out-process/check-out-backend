@@ -1,10 +1,10 @@
 import { BadRequestException, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import * as _ from 'lodash';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from '../users/users.service';
 import { genSalt, hash, compare } from 'bcrypt';
 import { sign, verify } from 'jsonwebtoken';
 import { LogInParams, UserCreationParams } from '@checkout/types';
-import { TokensService } from 'src/tokens/tokens.service';
+import { TokensService } from '../tokens/tokens.service';
 
 @Injectable()
 export class AuthService {

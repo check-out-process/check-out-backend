@@ -3,7 +3,7 @@ import { DepartmentCreationParams, DepartmentPatchParams } from '@checkout/types
 import { randomUUID } from 'crypto';
 import { Department } from './department.entities';
 import { Repository } from 'typeorm';
-import { createOrUpdateObjectFromParams } from 'src/common/utils';
+import { createOrUpdateObjectFromParams } from '../common/utils';
 
 @Injectable()
 export class DepartmentService {

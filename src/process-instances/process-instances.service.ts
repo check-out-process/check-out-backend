@@ -1,28 +1,28 @@
 import { CreateProcessInstanceFromDataParams, NewSectorInstanceData, ProcessInstanceStatusReturnedParams, Status, UpdateSectorInstanceParams, UpdateSectorStatusParams } from '@checkout/types';
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { Bed } from 'src/beds/beds.entities';
-import { ProcessType } from 'src/process-templates/process-templates.entities';
-import { Sector } from 'src/sectors/sectors.entities';
-import { User } from 'src/users/users.entities';
+import { Bed } from '../beds/beds.entities';
+import { ProcessType } from '../process-templates/process-templates.entities';
+import { Sector } from '../sectors/sectors.entities';
+import { User } from '../users/users.entities';
 import { Not, Repository } from 'typeorm';
 import { ProcessInstance } from './process-instances.entities';
 import { SectorInstance } from './sector-instance.entities';
 import { log } from 'console';
-import { DepartmentService } from 'src/department/department.service';
-import { RoomsService } from 'src/rooms/rooms.service';
-import { BedsService } from 'src/beds/beds.service';
-import { UsersService } from 'src/users/users.service';
-import { SectorsService } from 'src/sectors/sectors.service';
-import { ProcessTemplatesService } from 'src/process-templates/process-templates.service';
+import { DepartmentService } from '../department/department.service';
+import { RoomsService } from '../rooms/rooms.service';
+import { BedsService } from '../beds/beds.service';
+import { UsersService } from '../users/users.service';
+import { SectorsService } from '../sectors/sectors.service';
+import { ProcessTemplatesService } from '../process-templates/process-templates.service';
 import * as _ from 'lodash';
-import { Department } from 'src/department/department.entities';
-import { Room } from 'src/rooms/rooms.entities';
+import { Department } from '../department/department.entities';
+import { Room } from '../rooms/rooms.entities';
 import { Role } from '@checkout/types';
-import { SmsService } from 'src/sms/sms.service';
-import { SectorsController } from 'src/sectors/sectors.controller';
+import { SmsService } from '../sms/sms.service';
+import { SectorsController } from '../sectors/sectors.controller';
 import { url } from 'inspector';
-import Config from 'src/config';
+import Config from '../config';
 
 
 @Injectable()
