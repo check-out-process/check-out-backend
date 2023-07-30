@@ -62,7 +62,7 @@ describe('ProcessInstancesController', () => {
       const headers = { 'x-access-token': 'user_token' };
       jest.spyOn(moduleUser, 'getUserDecoded').mockReturnValue({id : 123})
       await controller.getUserProcessInstances(headers);
-      expect(processInstancesService.getUserProcessInstances).toHaveBeenCalledWith(123); // Replace 123 with the actual user ID
+      expect(processInstancesService.getUserProcessInstances).toHaveBeenCalledWith(123);
     });
   });
 
@@ -72,7 +72,7 @@ describe('ProcessInstancesController', () => {
       const headers = { 'x-access-token': 'user_token' };
       jest.spyOn(moduleUser, 'getUserDecoded').mockReturnValue({id : 123})
       const result = await controller.getUserProcessInstance(params, headers);
-      expect(result).toEqual({ id: 1, name: 'Process Instance 1', userId: 123 }); // Replace 123 with the actual user ID
+      expect(result).toEqual({ id: 1, name: 'Process Instance 1', userId: 123 });
     });
 
     it('should call getUserProcessInstance method with correct params and headers', async () => {
@@ -80,7 +80,7 @@ describe('ProcessInstancesController', () => {
       jest.spyOn(moduleUser, 'getUserDecoded').mockReturnValue({id : 123})
       const headers = { 'x-access-token': 'user_token' };
       await controller.getUserProcessInstance(params, headers);
-      expect(processInstancesService.getUserProcessInstance).toHaveBeenCalledWith(1, 123); // Replace 123 with the actual user ID
+      expect(processInstancesService.getUserProcessInstance).toHaveBeenCalledWith(1, 123);
     });
   });
 
@@ -126,7 +126,7 @@ describe('ProcessInstancesController', () => {
 
       const headers = { 'x-access-token': 'user_token' };
       const result = await controller.getProcessStatus(params, headers);
-      expect(result).toEqual({ bedId: 1, userId: 123, status: 'Status A' }); // Replace 123 with the actual user ID
+      expect(result).toEqual({ bedId: 1, userId: 123, status: 'Status A' });
     });
 
     it('should call getProcessStatus method with correct params and headers', async () => {
@@ -135,7 +135,7 @@ describe('ProcessInstancesController', () => {
 
       const headers = { 'x-access-token': 'user_token' };
       await controller.getProcessStatus(params, headers);
-      expect(processInstancesService.getProcessStatus).toHaveBeenCalledWith(1, 123); // Replace 123 with the actual user ID
+      expect(processInstancesService.getProcessStatus).toHaveBeenCalledWith(1, 123);
     });
   });
 
@@ -181,7 +181,7 @@ describe('ProcessInstancesController', () => {
         { id: 1, status: Status.In_Progress }, 
         Status.In_Progress,
       );
-      expect(processInstancesService.sendFinsihMessageToSector).toHaveBeenCalledWith( // Mocked sector instance and process instance IDs
+      expect(processInstancesService.sendFinsihMessageToSector).toHaveBeenCalledWith(
       { id: 1, status: Status.In_Progress },
         1,
       );
