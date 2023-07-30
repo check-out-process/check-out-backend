@@ -3,13 +3,12 @@ import { Body, Controller, Headers, Get, Param, Patch, Post, HttpException, Http
 import { ProcessInstance } from './process-instances.entities';
 import { ProcessInstancesService } from './process-instances.service';
 import { getUserDecoded } from '../auth/auth.helper';
-import { SmsService } from '../sms/sms.service';
 import { SectorInstance } from './sector-instance.entities';
 
 
 @Controller('process-instances')
 export class ProcessInstancesController {
-    constructor(private processInstancesService: ProcessInstancesService, private smsService: SmsService) { }
+    constructor(private processInstancesService: ProcessInstancesService) { }
 
     @Get()
     public async getUserProcessInstances(@Headers() headers): Promise<ProcessInstance[]> {
