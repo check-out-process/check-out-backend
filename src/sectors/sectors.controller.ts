@@ -28,22 +28,6 @@ export class SectorsController {
         return await this.sectorsService.addSector(data);
     }
 
-    // @Patch(':sectorID')
-    // public async updateSector(
-    //     @Param() params,
-    //     @Body() data: SectorPatchParams | SectorPatchAddUserParams) : Promise<Sector> {
-    //         if (data instanceof SectorPatchParams){
-    //             return await this.sectorsService.updateSector(params.sectorID, data);
-    //         }
-    //         else if (data instanceof SectorPatchAddUserParams){
-    //             return await this.sectorsService.addComitterToSector(params.sectorID, data);
-    //         }
-    //         else{
-    //             console.log("error");
-    //             return null
-    //         }
-    // }
-
     @Patch(':sectorID')
     public async updateSector(
         @Param() params,
