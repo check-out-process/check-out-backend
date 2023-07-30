@@ -14,7 +14,6 @@ describe('RoomsController', () => {
         {
           provide: RoomsService,
           useValue: {
-            // Mock or stub the methods of RoomsService that the controller uses
             getAllRoomsOfDepartment: jest.fn().mockResolvedValue([
               { id: 1, name: 'Room A' },
               { id: 2, name: 'Room B' },

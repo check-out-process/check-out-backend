@@ -14,7 +14,6 @@ describe('SectorsController', () => {
         {
           provide: SectorsService,
           useValue: {
-            // Mock or stub the methods of SectorsService that the controller uses
             getAllSectors: jest.fn().mockResolvedValue([
               { id: 1, name: 'Sector A' },
               { id: 2, name: 'Sector B' },
