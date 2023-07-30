@@ -10,7 +10,6 @@ class MockRoleRepository {
   find = jest.fn();
   create = jest.fn();
   save = jest.fn();
-  delete = jest.fn();
 }
 
 describe('RolesService', () => {
