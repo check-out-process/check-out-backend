@@ -1,8 +1,10 @@
 import { Controller,Post, Body, Delete, Headers } from '@nestjs/common';
 import { LogInParams, UserCreationParams } from '@checkout/types';
 import { AuthService } from './auth.service';
+import { ApiExcludeController } from '@nestjs/swagger';
 
 @Controller('auth')
+@ApiExcludeController()
 export class AuthController {
     constructor(private authService: AuthService) { }
 
