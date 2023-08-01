@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JobsService } from './jobs.service';
 import { Job } from './jobs.entities';
-import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 function randomUUID() {
@@ -30,9 +29,9 @@ describe('JobsService', () => {
   describe('createJob', () => {
     it('should create a job and return it', async () => {
       // Arrange
-      const createJobParams = { /* provide necessary data for creating a job */ };
+      const createJobParams = { };
 
-      // Mock the repository's create and save methods
+      
       const createdJob = new Job();
       jest.spyOn(jobsRepository, 'create').mockReturnValue(createdJob);
       jest.spyOn(jobsRepository, 'save').mockResolvedValue(createdJob);
