@@ -29,7 +29,7 @@ export class ProcessInstancesController {
 
     @Post()
     @ApiOkResponse({description: 'Process Instance created'})
-    public async createProcessInstance(@Body() data: CreateProcessInstanceFromDataParams): Promise<ProcessInstance> {
+    public async createProcessInstance(@Body() data: CreateProcessInstanceFromDataParams | any): Promise<ProcessInstance> {
         const process: ProcessInstance = await this.processInstancesService.createProcessInstanceFromData(data);
         await this.processInstancesService.notifyNextCommitingSectorProcess(process)
         return process;
